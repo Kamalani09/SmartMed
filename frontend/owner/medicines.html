@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMED - Medicine Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --accent-color: #8bc34a;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #e0e0e0;
+            --card-bg: #ffffff;
+            --body-bg: #f5f5f5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            background-color: var(--card-bg);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .profile-img-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-icon {
+            position: relative;
+        }
+        
+        .category-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 100%;
+            border: 2px solid transparent;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+        
+        .category-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .medicine-card {
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .medicine-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .badge-available {
+            background-color: var(--primary-color);
+        }
+        
+        .badge-low {
+            background-color: #ff9800;
+        }
+        
+        .badge-out {
+            background-color: #f44336;
+        }
+        
+        .medicine-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .medicine-details.show {
+            max-height: 500px;
+        }
+        
+        .back-to-categories {
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+        
+        .back-to-categories:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chatbot-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .chatbot-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chatbot-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: var(--light-bg);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background-color: var(--primary-light);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .chatbot-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            outline: none;
+        }
+        
+        .chatbot-input button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .chatbot-window {
+                width: 300px;
+                right: -50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar d-md-block">
+                <div class="text-center mb-4">
+                    <h3 class="text-white">SmartMED</h3>
+                    <p class="text-light">Shop Owner Dashboard</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-cart.html">
+                            <i class="fas fa-shopping-cart"></i> Manage Cart
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="medicines.html">
+                            <i class="fas fa-pills"></i> Medicines
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="expiry-list.html">
+                            <i class="fas fa-calendar-times"></i> Expiry List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="threshold-list.html">
+                            <i class="fas fa-exclamation-triangle"></i> Threshold List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="out-of-stock.html">
+                            <i class="fas fa-times-circle"></i> Out of Stock
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sales-profits.html">
+                            <i class="fas fa-chart-line"></i> Sales & Profits
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link" href="#" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Header -->
+                <div class="header">
+                    <h4 class="mb-0">Medicine Management</h4>
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon me-3">
+                            <i class="fas fa-bell fa-lg text-muted"></i>
+                            <span class="notification-badge">3</span>
+                        </div>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="profile-img-sm me-2" id="headerProfileImage">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span id="headerUserName">John Doe</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+                                <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="logoutDropdown"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categories View -->
+                <div class="row" id="categoriesView">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>Medicine Categories</span>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+                                    <i class="fas fa-plus me-1"></i> Add Medicine
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Pain Relief Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="pain-relief">
+                                            <div class="category-icon">
+                                                <i class="fas fa-head-side-virus"></i>
+                                            </div>
+                                            <h5>Pain Relief</h5>
+                                            <p class="text-muted">12 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Antibiotics Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="antibiotics">
+                                            <div class="category-icon">
+                                                <i class="fas fa-bacteria"></i>
+                                            </div>
+                                            <h5>Antibiotics</h5>
+                                            <p class="text-muted">8 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Vitamins Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="vitamins">
+                                            <div class="category-icon">
+                                                <i class="fas fa-capsules"></i>
+                                            </div>
+                                            <h5>Vitamins & Supplements</h5>
+                                            <p class="text-muted">10 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Allergy Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="allergy">
+                                            <div class="category-icon">
+                                                <i class="fas fa-wind"></i>
+                                            </div>
+                                            <h5>Allergy & Cold</h5>
+                                            <p class="text-muted">6 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Digestive Health Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="digestive">
+                                            <div class="category-icon">
+                                                <i class="fas fa-stomach"></i>
+                                            </div>
+                                            <h5>Digestive Health</h5>
+                                            <p class="text-muted">7 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Skin Care Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="skin-care">
+                                            <div class="category-icon">
+                                                <i class="fas fa-spa"></i>
+                                            </div>
+                                            <h5>Skin Care</h5>
+                                            <p class="text-muted">5 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Respiratory Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="respiratory">
+                                            <div class="category-icon">
+                                                <i class="fas fa-lungs"></i>
+                                            </div>
+                                            <h5>Respiratory</h5>
+                                            <p class="text-muted">4 medicines</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Other Medicines Category -->
+                                    <div class="col-md-3 mb-4">
+                                        <div class="card category-card text-center p-3" data-category="other">
+                                            <div class="category-icon">
+                                                <i class="fas fa-pills"></i>
+                                            </div>
+                                            <h5>Other Medicines</h5>
+                                            <p class="text-muted">15 medicines</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Medicine List View (Hidden by default) -->
+                <div class="row" id="medicineListView" style="display: none;">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button style="color:white;" class="btn btn-sm btn-outline-secondary me-2 back-to-categories" id="backToCategories">
+                                        <i class="fas fa-arrow-left me-1"></i> Back to Categories
+                                    </button>
+                                    <span id="categoryTitle">Medicines</span>
+                                </div>
+                                <button class="btn btn-primary" id="addToCategoryBtn">
+                                    <i class="fas fa-plus me-1"></i> Add Medicine to this Category
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="medicineListContent">
+                                    <!-- Medicine list will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Medicine Modal -->
+    <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMedicineModalLabel">Add New Medicine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMedicineForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="medicineName" class="form-label">Medicine Name</label>
+                                <input type="text" class="form-control" id="medicineName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="medicineCategory" class="form-label">Category</label>
+                                <select class="form-select" id="medicineCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="pain-relief">Pain Relief</option>
+                                    <option value="antibiotics">Antibiotics</option>
+                                    <option value="vitamins">Vitamins & Supplements</option>
+                                    <option value="allergy">Allergy & Cold</option>
+                                    <option value="digestive">Digestive Health</option>
+                                    <option value="skin-care">Skin Care</option>
+                                    <option value="respiratory">Respiratory</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="medicinePrice" class="form-label">Price ($)</label>
+                                <input type="number" class="form-control" id="medicinePrice" step="0.01" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="medicineStock" class="form-label">Stock Quantity</label>
+                                <input type="number" class="form-control" id="medicineStock" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="medicineDosage" class="form-label">Dosage</label>
+                                <input type="text" class="form-control" id="medicineDosage" placeholder="e.g., 500mg" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="medicineExpiry" class="form-label">Expiry Date</label>
+                                <input type="date" class="form-control" id="medicineExpiry" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="medicineManufacturer" class="form-label">Manufacturer</label>
+                                <input type="text" class="form-control" id="medicineManufacturer" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="medicineDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="medicineDescription" rows="3" placeholder="Enter medicine description..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="medicineUses" class="form-label">Uses</label>
+                            <textarea class="form-control" id="medicineUses" rows="2" placeholder="Enter medicine uses..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="medicineSideEffects" class="form-label">Side Effects</label>
+                            <textarea class="form-control" id="medicineSideEffects" rows="2" placeholder="Enter possible side effects..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveMedicineBtn">Save Medicine</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container">
+        <button class="chatbot-btn" id="chatbotToggle">
+            <i class="fas fa-robot"></i>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h6 class="mb-0">SmartMED Assistant</h6>
+                <button class="btn-close btn-close-white" id="closeChatbot"></button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot-message">
+                    Hello! I can help you manage your medicine inventory.
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="Type your message...">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Medicine Data
+        const medicineData = {
+            'pain-relief': [
+                {
+                    id: 1,
+                    name: 'Paracetamol 500mg',
+                    price: 5.99,
+                    stock: 45,
+                    dosage: '500mg',
+                    expiry: '2024-12-15',
+                    manufacturer: 'PharmaCorp',
+                    description: 'Effective pain reliever and fever reducer',
+                    uses: 'Headache, fever, mild to moderate pain',
+                    sideEffects: 'Nausea, stomach pain (rare)',
+                    status: 'available'
+                },
+                {
+                    id: 2,
+                    name: 'Ibuprofen 400mg',
+                    price: 7.25,
+                    stock: 0,
+                    dosage: '400mg',
+                    expiry: '2025-09-12',
+                    manufacturer: 'MediHealth',
+                    description: 'Nonsteroidal anti-inflammatory drug',
+                    uses: 'Pain, inflammation, fever',
+                    sideEffects: 'Stomach upset, dizziness',
+                    status: 'out'
+                },
+                {
+                    id: 3,
+                    name: 'Aspirin 75mg',
+                    price: 4.50,
+                    stock: 25,
+                    dosage: '75mg',
+                    expiry: '2025-05-20',
+                    manufacturer: 'HeartCare Pharma',
+                    description: 'Used to reduce pain, fever, or inflammation',
+                    uses: 'Pain relief, blood thinner',
+                    sideEffects: 'Stomach irritation, bleeding risk',
+                    status: 'available'
+                },
+                {
+                    id: 4,
+                    name: 'Naproxen 250mg',
+                    price: 8.75,
+                    stock: 18,
+                    dosage: '250mg',
+                    expiry: '2025-03-15',
+                    manufacturer: 'PainRelief Inc',
+                    description: 'NSAID for pain and inflammation',
+                    uses: 'Arthritis, menstrual cramps, pain',
+                    sideEffects: 'Heartburn, dizziness',
+                    status: 'available'
+                },
+                {
+                    id: 5,
+                    name: 'Diclofenac Sodium 50mg',
+                    price: 6.99,
+                    stock: 8,
+                    dosage: '50mg',
+                    expiry: '2024-11-30',
+                    manufacturer: 'ArthroCare',
+                    description: 'Anti-inflammatory pain reliever',
+                    uses: 'Arthritis, muscle pain',
+                    sideEffects: 'Stomach pain, nausea',
+                    status: 'low'
+                },
+                {
+                    id: 6,
+                    name: 'Tramadol 50mg',
+                    price: 12.50,
+                    stock: 15,
+                    dosage: '50mg',
+                    expiry: '2025-07-22',
+                    manufacturer: 'Pain Solutions',
+                    description: 'Opioid pain medication',
+                    uses: 'Moderate to severe pain',
+                    sideEffects: 'Dizziness, nausea, constipation',
+                    status: 'available'
+                },
+                {
+                    id: 7,
+                    name: 'Codeine 30mg',
+                    price: 9.25,
+                    stock: 5,
+                    dosage: '30mg',
+                    expiry: '2025-01-18',
+                    manufacturer: 'Cough & Pain Relief',
+                    description: 'Narcotic pain reliever and cough suppressant',
+                    uses: 'Pain relief, cough suppression',
+                    sideEffects: 'Drowsiness, constipation',
+                    status: 'low'
+                },
+                {
+                    id: 8,
+                    name: 'Celecoxib 100mg',
+                    price: 15.75,
+                    stock: 22,
+                    dosage: '100mg',
+                    expiry: '2025-08-14',
+                    manufacturer: 'Arthritis Care',
+                    description: 'Selective COX-2 inhibitor',
+                    uses: 'Osteoarthritis, rheumatoid arthritis',
+                    sideEffects: 'Headache, abdominal pain',
+                    status: 'available'
+                },
+                {
+                    id: 9,
+                    name: 'Acetaminophen 650mg',
+                    price: 6.25,
+                    stock: 35,
+                    dosage: '650mg',
+                    expiry: '2025-04-30',
+                    manufacturer: 'FeverRelief',
+                    description: 'Pain reliever and fever reducer',
+                    uses: 'Pain, fever, headaches',
+                    sideEffects: 'Liver damage (in high doses)',
+                    status: 'available'
+                },
+                {
+                    id: 10,
+                    name: 'Ketorolac 10mg',
+                    price: 11.99,
+                    stock: 12,
+                    dosage: '10mg',
+                    expiry: '2025-06-25',
+                    manufacturer: 'StrongPain Relief',
+                    description: 'NSAID for short-term pain management',
+                    uses: 'Moderate to severe pain',
+                    sideEffects: 'Stomach bleeding, kidney problems',
+                    status: 'available'
+                }
+            ],
+            'antibiotics': [
+                {
+                    id: 11,
+                    name: 'Amoxicillin 250mg',
+                    price: 12.50,
+                    stock: 8,
+                    dosage: '250mg',
+                    expiry: '2024-10-20',
+                    manufacturer: 'AntibioTech',
+                    description: 'Penicillin antibiotic that fights bacteria',
+                    uses: 'Bacterial infections, ear infections',
+                    sideEffects: 'Diarrhea, nausea, rash',
+                    status: 'low'
+                },
+                {
+                    id: 12,
+                    name: 'Azithromycin 500mg',
+                    price: 15.75,
+                    stock: 15,
+                    dosage: '500mg',
+                    expiry: '2025-03-15',
+                    manufacturer: 'Z-Pack Pharma',
+                    description: 'Macrolide antibiotic',
+                    uses: 'Respiratory infections, STDs',
+                    sideEffects: 'Diarrhea, nausea, stomach pain',
+                    status: 'available'
+                },
+                {
+                    id: 13,
+                    name: 'Ciprofloxacin 500mg',
+                    price: 18.25,
+                    stock: 20,
+                    dosage: '500mg',
+                    expiry: '2025-09-30',
+                    manufacturer: 'BactaKill',
+                    description: 'Fluoroquinolone antibiotic',
+                    uses: 'UTI, respiratory infections',
+                    sideEffects: 'Tendon damage, nerve damage',
+                    status: 'available'
+                },
+                {
+                    id: 14,
+                    name: 'Doxycycline 100mg',
+                    price: 14.99,
+                    stock: 25,
+                    dosage: '100mg',
+                    expiry: '2025-07-18',
+                    manufacturer: 'TetraCare',
+                    description: 'Tetracycline antibiotic',
+                    uses: 'Acne, malaria prevention, infections',
+                    sideEffects: 'Sun sensitivity, stomach upset',
+                    status: 'available'
+                },
+                {
+                    id: 15,
+                    name: 'Cephalexin 500mg',
+                    price: 13.25,
+                    stock: 18,
+                    dosage: '500mg',
+                    expiry: '2025-02-28',
+                    manufacturer: 'Cepharma',
+                    description: 'Cephalosporin antibiotic',
+                    uses: 'Skin infections, UTI, respiratory',
+                    sideEffects: 'Diarrhea, nausea, rash',
+                    status: 'available'
+                },
+                {
+                    id: 16,
+                    name: 'Metronidazole 500mg',
+                    price: 11.75,
+                    stock: 12,
+                    dosage: '500mg',
+                    expiry: '2025-05-14',
+                    manufacturer: 'Flagyl Pharma',
+                    description: 'Nitroimidazole antibiotic',
+                    uses: 'Parasitic infections, bacterial vaginosis',
+                    sideEffects: 'Metallic taste, nausea',
+                    status: 'available'
+                },
+                {
+                    id: 17,
+                    name: 'Clindamycin 300mg',
+                    price: 16.50,
+                    stock: 8,
+                    dosage: '300mg',
+                    expiry: '2025-01-22',
+                    manufacturer: 'Cleocin Corp',
+                    description: 'Lincosamide antibiotic',
+                    uses: 'Acne, dental infections',
+                    sideEffects: 'Diarrhea, stomach pain',
+                    status: 'low'
+                },
+                {
+                    id: 18,
+                    name: 'Levofloxacin 500mg',
+                    price: 19.99,
+                    stock: 15,
+                    dosage: '500mg',
+                    expiry: '2025-08-08',
+                    manufacturer: 'Levaquin Labs',
+                    description: 'Fluoroquinolone antibiotic',
+                    uses: 'Pneumonia, skin infections',
+                    sideEffects: 'Tendonitis, nerve damage',
+                    status: 'available'
+                }
+            ],
+            'vitamins': [
+                {
+                    id: 19,
+                    name: 'Vitamin C 1000mg',
+                    price: 8.75,
+                    stock: 0,
+                    dosage: '1000mg',
+                    expiry: '2025-08-05',
+                    manufacturer: 'VitaCorp',
+                    description: 'Essential vitamin for immune system',
+                    uses: 'Immune support, antioxidant',
+                    sideEffects: 'Diarrhea (in high doses)',
+                    status: 'out'
+                },
+                {
+                    id: 20,
+                    name: 'Vitamin D3 1000IU',
+                    price: 9.99,
+                    stock: 30,
+                    dosage: '1000IU',
+                    expiry: '2025-11-30',
+                    manufacturer: 'Sunshine Vitamins',
+                    description: 'Vitamin D supplement',
+                    uses: 'Bone health, immune function',
+                    sideEffects: 'Nausea, constipation (rare)',
+                    status: 'available'
+                },
+                {
+                    id: 21,
+                    name: 'Multivitamin Complex',
+                    price: 12.50,
+                    stock: 25,
+                    dosage: 'One tablet daily',
+                    expiry: '2025-06-15',
+                    manufacturer: 'Complete Nutrition',
+                    description: 'Comprehensive vitamin and mineral supplement',
+                    uses: 'General health and wellness',
+                    sideEffects: 'Upset stomach (rare)',
+                    status: 'available'
+                },
+                {
+                    id: 22,
+                    name: 'Vitamin B12 1000mcg',
+                    price: 7.25,
+                    stock: 18,
+                    dosage: '1000mcg',
+                    expiry: '2025-04-20',
+                    manufacturer: 'Energy Boost',
+                    description: 'Essential B vitamin for energy',
+                    uses: 'Energy production, nerve function',
+                    sideEffects: 'None known at recommended doses',
+                    status: 'available'
+                },
+                {
+                    id: 23,
+                    name: 'Calcium + Vitamin D',
+                    price: 10.99,
+                    stock: 22,
+                    dosage: '600mg Calcium + 400IU D3',
+                    expiry: '2025-09-12',
+                    manufacturer: 'Bone Health Inc',
+                    description: 'Bone strengthening supplement',
+                    uses: 'Bone health, osteoporosis prevention',
+                    sideEffects: 'Constipation, gas',
+                    status: 'available'
+                },
+                {
+                    id: 24,
+                    name: 'Iron Supplement 65mg',
+                    price: 6.75,
+                    stock: 15,
+                    dosage: '65mg',
+                    expiry: '2025-03-08',
+                    manufacturer: 'IronMax',
+                    description: 'Iron supplement for anemia',
+                    uses: 'Iron deficiency, anemia',
+                    sideEffects: 'Constipation, stomach upset',
+                    status: 'available'
+                },
+                {
+                    id: 25,
+                    name: 'Omega-3 Fish Oil 1000mg',
+                    price: 14.25,
+                    stock: 20,
+                    dosage: '1000mg',
+                    expiry: '2025-07-30',
+                    manufacturer: 'Ocean Health',
+                    description: 'Essential fatty acids for heart health',
+                    uses: 'Heart health, brain function',
+                    sideEffects: 'Fishy aftertaste, burping',
+                    status: 'available'
+                },
+                {
+                    id: 26,
+                    name: 'Zinc 50mg',
+                    price: 5.99,
+                    stock: 28,
+                    dosage: '50mg',
+                    expiry: '2025-05-25',
+                    manufacturer: 'Immune Support',
+                    description: 'Essential mineral for immune function',
+                    uses: 'Immune support, wound healing',
+                    sideEffects: 'Nausea, metallic taste',
+                    status: 'available'
+                },
+                {
+                    id: 27,
+                    name: 'Magnesium 400mg',
+                    price: 8.50,
+                    stock: 16,
+                    dosage: '400mg',
+                    expiry: '2025-08-18',
+                    manufacturer: 'Muscle Relax',
+                    description: 'Mineral for muscle and nerve function',
+                    uses: 'Muscle cramps, sleep aid',
+                    sideEffects: 'Diarrhea (in high doses)',
+                    status: 'available'
+                },
+                {
+                    id: 28,
+                    name: 'Vitamin E 400IU',
+                    price: 9.25,
+                    stock: 12,
+                    dosage: '400IU',
+                    expiry: '2025-02-14',
+                    manufacturer: 'Antioxidant Plus',
+                    description: 'Powerful antioxidant vitamin',
+                    uses: 'Skin health, antioxidant protection',
+                    sideEffects: 'None at recommended doses',
+                    status: 'available'
+                }
+            ],
+		'allergy': [
+		    {
+			id: 29,
+			name: 'Cetirizine 10mg',
+			price: 6.50,
+			stock: 45,
+			dosage: '10mg',
+			expiry: '2025-03-18',
+			manufacturer: 'AllergyRelief Inc',
+			description: 'Antihistamine for allergy relief',
+			uses: 'Hay fever, allergies, hives',
+			sideEffects: 'Drowsiness, dry mouth',
+			status: 'available'
+		    },
+		    {
+			id: 30,
+			name: 'Loratadine 10mg',
+			price: 7.25,
+			stock: 22,
+			dosage: '10mg',
+			expiry: '2025-06-22',
+			manufacturer: 'Claritin Corp',
+			description: 'Non-drowsy allergy relief',
+			uses: 'Seasonal allergies, hives',
+			sideEffects: 'Headache, fatigue',
+			status: 'available'
+		    },
+		    {
+			id: 31,
+			name: 'Fexofenadine 180mg',
+			price: 8.99,
+			stock: 18,
+			dosage: '180mg',
+			expiry: '2025-04-15',
+			manufacturer: 'Allegra Pharma',
+			description: 'Non-drowsy antihistamine',
+			uses: 'Seasonal allergies, skin allergies',
+			sideEffects: 'Nausea, diarrhea',
+			status: 'available'
+		    },
+		    {
+			id: 32,
+			name: 'Diphenhydramine 25mg',
+			price: 5.75,
+			stock: 30,
+			dosage: '25mg',
+			expiry: '2025-01-30',
+			manufacturer: 'Benadryl Labs',
+			description: 'Antihistamine for allergies and sleep aid',
+			uses: 'Allergies, insomnia, motion sickness',
+			sideEffects: 'Drowsiness, dry mouth',
+			status: 'available'
+		    },
+		    {
+			id: 33,
+			name: 'Montelukast 10mg',
+			price: 12.50,
+			stock: 15,
+			dosage: '10mg',
+			expiry: '2025-08-10',
+			manufacturer: 'Singulair Pharma',
+			description: 'Leukotriene receptor antagonist',
+			uses: 'Asthma, allergic rhinitis',
+			sideEffects: 'Headache, stomach pain',
+			status: 'available'
+		    },
+		    {
+			id: 34,
+			name: 'Chlorpheniramine 4mg',
+			price: 4.99,
+			stock: 8,
+			dosage: '4mg',
+			expiry: '2024-12-20',
+			manufacturer: 'Chlor-Trimeton',
+			description: 'Classic antihistamine',
+			uses: 'Allergies, common cold',
+			sideEffects: 'Drowsiness, dizziness',
+			status: 'low'
+		    }
+		],
+		'digestive': [
+		    {
+			id: 35,
+			name: 'Omeprazole 20mg',
+			price: 9.99,
+			stock: 25,
+			dosage: '20mg',
+			expiry: '2025-05-15',
+			manufacturer: 'Prilosec Corp',
+			description: 'Proton pump inhibitor for acid reduction',
+			uses: 'Acid reflux, GERD, ulcers',
+			sideEffects: 'Headache, diarrhea',
+			status: 'available'
+		    },
+		    {
+			id: 36,
+			name: 'Ranitidine 150mg',
+			price: 7.50,
+			stock: 0,
+			dosage: '150mg',
+			expiry: '2025-02-28',
+			manufacturer: 'Zantac Pharma',
+			description: 'H2 blocker for acid reduction',
+			uses: 'Heartburn, acid indigestion',
+			sideEffects: 'Headache, constipation',
+			status: 'out'
+		    },
+		    {
+			id: 37,
+			name: 'Loperamide 2mg',
+			price: 6.25,
+			stock: 20,
+			dosage: '2mg',
+			expiry: '2025-07-18',
+			manufacturer: 'Imodium Inc',
+			description: 'Anti-diarrheal medication',
+			uses: 'Diarrhea control',
+			sideEffects: 'Constipation, dizziness',
+			status: 'available'
+		    },
+		    {
+			id: 38,
+			name: 'Simethicone 125mg',
+			price: 5.50,
+			stock: 35,
+			dosage: '125mg',
+			expiry: '2025-03-22',
+			manufacturer: 'Gas-X Labs',
+			description: 'Anti-gas medication',
+			uses: 'Gas relief, bloating',
+			sideEffects: 'None known',
+			status: 'available'
+		    },
+		    {
+			id: 39,
+			name: 'Psyllium Husk Powder',
+			price: 8.75,
+			stock: 18,
+			dosage: 'One scoop daily',
+			expiry: '2025-09-30',
+			manufacturer: 'Metamucil',
+			description: 'Natural fiber supplement',
+			uses: 'Constipation, cholesterol control',
+			sideEffects: 'Gas, bloating',
+			status: 'available'
+		    },
+		    {
+			id: 40,
+			name: 'Bismuth Subsalicylate',
+			price: 7.99,
+			stock: 22,
+			dosage: '524mg',
+			expiry: '2025-04-12',
+			manufacturer: 'Pepto-Bismol',
+			description: 'Antacid and anti-diarrheal',
+			uses: 'Upset stomach, diarrhea',
+			sideEffects: 'Darkened stools, constipation',
+			status: 'available'
+		    },
+		    {
+			id: 41,
+			name: 'Docusate Sodium 100mg',
+			price: 6.50,
+			stock: 15,
+			dosage: '100mg',
+			expiry: '2025-08-25',
+			manufacturer: 'Colace Corp',
+			description: 'Stool softener',
+			uses: 'Constipation prevention',
+			sideEffects: 'Stomach cramps, throat irritation',
+			status: 'available'
+		    }
+		],
+		'skin-care': [
+		    {
+			id: 42,
+			name: 'Hydrocortisone Cream 1%',
+			price: 8.25,
+			stock: 28,
+			dosage: 'Apply 2-3 times daily',
+			expiry: '2025-06-14',
+			manufacturer: 'Cortizone-10',
+			description: 'Topical steroid for skin inflammation',
+			uses: 'Itching, rash, eczema',
+			sideEffects: 'Skin thinning, burning',
+			status: 'available'
+		    },
+		    {
+			id: 43,
+			name: 'Clotrimazole Cream 1%',
+			price: 9.50,
+			stock: 20,
+			dosage: 'Apply twice daily',
+			expiry: '2025-03-08',
+			manufacturer: 'Lotrimin',
+			description: 'Antifungal cream',
+			uses: 'Athletes foot, ringworm, jock itch',
+			sideEffects: 'Skin irritation, itching',
+			status: 'available'
+		    },
+		    {
+			id: 44,
+			name: 'Benzoyl Peroxide 5%',
+			price: 7.75,
+			stock: 25,
+			dosage: 'Apply once or twice daily',
+			expiry: '2025-07-30',
+			manufacturer: 'Clearasil',
+			description: 'Acne treatment',
+			uses: 'Acne, pimples',
+			sideEffects: 'Dryness, redness, peeling',
+			status: 'available'
+		    },
+		    {
+			id: 45,
+			name: 'Salicylic Acid 2%',
+			price: 6.99,
+			stock: 18,
+			dosage: 'Apply to affected area',
+			expiry: '2025-05-18',
+			manufacturer: 'Stridex',
+			description: 'Acne treatment and exfoliant',
+			uses: 'Acne, warts, psoriasis',
+			sideEffects: 'Skin irritation, dryness',
+			status: 'available'
+		    },
+		    {
+			id: 46,
+			name: 'Calamine Lotion',
+			price: 5.25,
+			stock: 12,
+			dosage: 'Apply as needed',
+			expiry: '2025-02-28',
+			manufacturer: 'Pink Lotion Co',
+			description: 'Skin protectant and anti-itch',
+			uses: 'Poison ivy, insect bites, chickenpox',
+			sideEffects: 'None known',
+			status: 'available'
+		    }
+		],
+		'respiratory': [
+		    {
+			id: 47,
+			name: 'Albuterol Inhaler',
+			price: 25.99,
+			stock: 15,
+			dosage: '2 puffs every 4-6 hours',
+			expiry: '2025-08-15',
+			manufacturer: 'ProAir',
+			description: 'Bronchodilator for asthma',
+			uses: 'Asthma, bronchospasm',
+			sideEffects: 'Nervousness, shaking, headache',
+			status: 'available'
+		    },
+		    {
+			id: 48,
+			name: 'Guaifenesin 400mg',
+			price: 8.50,
+			stock: 22,
+			dosage: '400mg every 4 hours',
+			expiry: '2025-04-20',
+			manufacturer: 'Mucinex',
+			description: 'Expectorant for chest congestion',
+			uses: 'Chest congestion, cough',
+			sideEffects: 'Nausea, vomiting',
+			status: 'available'
+		    },
+		    {
+			id: 49,
+			name: 'Dextromethorphan 30mg',
+			price: 7.25,
+			stock: 18,
+			dosage: '30mg every 6-8 hours',
+			expiry: '2025-03-12',
+			manufacturer: 'Robitussin',
+			description: 'Cough suppressant',
+			uses: 'Cough relief',
+			sideEffects: 'Drowsiness, dizziness',
+			status: 'available'
+		    },
+		    {
+			id: 50,
+			name: 'Pseudoephedrine 30mg',
+			price: 9.75,
+			stock: 8,
+			dosage: '30mg every 4-6 hours',
+			expiry: '2025-01-30',
+			manufacturer: 'Sudafed',
+			description: 'Nasal decongestant',
+			uses: 'Nasal congestion, sinus pressure',
+			sideEffects: 'Nervousness, sleeplessness',
+			status: 'low'
+		    }
+		],
+		'other': [
+		    {
+			id: 51,
+			name: 'Metformin 500mg',
+			price: 12.99,
+			stock: 30,
+			dosage: '500mg twice daily',
+			expiry: '2025-09-20',
+			manufacturer: 'Glucophage',
+			description: 'Oral diabetes medication',
+			uses: 'Type 2 diabetes',
+			sideEffects: 'Nausea, diarrhea, stomach upset',
+			status: 'available'
+		    },
+		    {
+			id: 52,
+			name: 'Atorvastatin 20mg',
+			price: 15.75,
+			stock: 25,
+			dosage: '20mg once daily',
+			expiry: '2025-07-14',
+			manufacturer: 'Lipitor',
+			description: 'Cholesterol-lowering medication',
+			uses: 'High cholesterol',
+			sideEffects: 'Muscle pain, joint pain',
+			status: 'available'
+		    },
+		    {
+			id: 53,
+			name: 'Levothyroxine 50mcg',
+			price: 10.50,
+			stock: 20,
+			dosage: '50mcg once daily',
+			expiry: '2025-05-08',
+			manufacturer: 'Synthroid',
+			description: 'Thyroid hormone replacement',
+			uses: 'Hypothyroidism',
+			sideEffects: 'Headache, nervousness',
+			status: 'available'
+		    },
+		    {
+			id: 54,
+			name: 'Warfarin 5mg',
+			price: 8.25,
+			stock: 15,
+			dosage: '5mg once daily',
+			expiry: '2025-03-25',
+			manufacturer: 'Coumadin',
+			description: 'Blood thinner',
+			uses: 'Blood clot prevention',
+			sideEffects: 'Bleeding, bruising',
+			status: 'available'
+		    },
+		    {
+			id: 55,
+			name: 'Sertraline 50mg',
+			price: 14.99,
+			stock: 18,
+			dosage: '50mg once daily',
+			expiry: '2025-08-30',
+			manufacturer: 'Zoloft',
+			description: 'Antidepressant (SSRI)',
+			uses: 'Depression, anxiety, OCD',
+			sideEffects: 'Nausea, insomnia, sexual dysfunction',
+			status: 'available'
+		    }
+		]
+        };
+
+        // Load profile data
+        function loadDashboardProfileData() {
+            const savedData = localStorage.getItem('profileData');
+            if (savedData) {
+                const profileData = JSON.parse(savedData);
+                const headerUserName = document.getElementById('headerUserName');
+                const headerProfileImage = document.getElementById('headerProfileImage');
+                
+                if (headerUserName) {
+                    headerUserName.textContent = `${profileData.firstName} ${profileData.lastName}`;
+                }
+                
+                if (headerProfileImage && profileData.profileImage) {
+                    headerProfileImage.style.backgroundImage = profileData.profileImage;
+                    headerProfileImage.style.backgroundColor = 'transparent';
+                    headerProfileImage.innerHTML = '';
+                }
+            }
+        }
+
+        // Category click handler
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                showMedicineList(category);
+            });
+        });
+
+        // Back to categories handler
+        document.getElementById('backToCategories').addEventListener('click', function() {
+            document.getElementById('categoriesView').style.display = 'block';
+            document.getElementById('medicineListView').style.display = 'none';
+        });
+
+        // Add to category button
+        document.getElementById('addToCategoryBtn').addEventListener('click', function() {
+            const currentCategory = document.getElementById('categoryTitle').getAttribute('data-category');
+            if (currentCategory) {
+                document.getElementById('medicineCategory').value = currentCategory;
+            }
+            new bootstrap.Modal(document.getElementById('addMedicineModal')).show();
+        });
+
+        // Show medicine list for a category
+        function showMedicineList(category) {
+            document.getElementById('categoriesView').style.display = 'none';
+            document.getElementById('medicineListView').style.display = 'block';
+            
+            // Update category title
+            const categoryTitle = document.getElementById('categoryTitle');
+            const categoryName = document.querySelector(`[data-category="${category}"] h5`).textContent;
+            categoryTitle.textContent = `${categoryName} Medicines`;
+            categoryTitle.setAttribute('data-category', category);
+            
+            // Populate medicine list
+            const medicineListContent = document.getElementById('medicineListContent');
+            medicineListContent.innerHTML = '';
+            
+            if (medicineData[category]) {
+                medicineData[category].forEach(medicine => {
+                    const statusBadge = getStatusBadge(medicine.status);
+                    const medicineCard = `
+                        <div class="card medicine-card mb-3">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        <h6 class="mb-1">${medicine.name}</h6>
+                                        <small class="text-muted">${medicine.manufacturer}</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <strong>$${medicine.price.toFixed(2)}</strong>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span>Stock: ${medicine.stock}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span>Dosage: ${medicine.dosage}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        ${statusBadge}
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button class="btn btn-sm btn-outline-primary view-medicine-details" data-id="${medicine.id}" data-category="${category}">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="medicine-details mt-3" id="details-${medicine.id}">
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Description:</strong>
+                                            <p>${medicine.description}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Uses:</strong>
+                                            <p>${medicine.uses}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Side Effects:</strong>
+                                            <p>${medicine.sideEffects}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Expiry Date:</strong>
+                                            <p>${new Date(medicine.expiry).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2 mt-3">
+                                        <button class="btn btn-sm btn-outline-primary edit-medicine" data-id="${medicine.id}" data-category="${category}">
+                                            <i class="fas fa-edit me-1"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-medicine" data-id="${medicine.id}" data-category="${category}">
+                                            <i class="fas fa-trash me-1"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    medicineListContent.innerHTML += medicineCard;
+                });
+            } else {
+                medicineListContent.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                        <h5>No medicines found in this category</h5>
+                        <p class="text-muted">Add medicines to this category to get started.</p>
+                    </div>
+                `;
+            }
+            
+            // Add event listeners to view details buttons
+            document.querySelectorAll('.view-medicine-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = this.getAttribute('data-id');
+                    const detailsDiv = document.getElementById(`details-${medicineId}`);
+                    const icon = this.querySelector('i');
+                    
+                    if (detailsDiv.classList.contains('show')) {
+                        detailsDiv.classList.remove('show');
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    } else {
+                        detailsDiv.classList.add('show');
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    }
+                });
+            });
+        }
+
+        // Helper function for status badges
+        function getStatusBadge(status) {
+            const statusClasses = {
+                'available': 'badge-available',
+                'low': 'badge-low',
+                'out': 'badge-out'
+            };
+            
+            const statusTexts = {
+                'available': 'Available',
+                'low': 'Low Stock',
+                'out': 'Out of Stock'
+            };
+            
+            return `<span class="badge ${statusClasses[status]}">${statusTexts[status]}</span>`;
+        }
+
+        // Save medicine handler
+        // Save medicine handler with localStorage functionality
+document.getElementById('saveMedicineBtn').addEventListener('click', function() {
+    const form = document.getElementById('addMedicineForm');
+    if (form.checkValidity()) {
+        addNewMedicine();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addMedicineModal'));
+        modal.hide();
+        form.reset();
+    } else {
+        form.reportValidity();
+    }
+});
+
+// Function to add new medicine
+function addNewMedicine() {
+    const name = document.getElementById('medicineName').value;
+    const category = document.getElementById('medicineCategory').value;
+    const price = parseFloat(document.getElementById('medicinePrice').value);
+    const stock = parseInt(document.getElementById('medicineStock').value);
+    const dosage = document.getElementById('medicineDosage').value;
+    const expiry = document.getElementById('medicineExpiry').value;
+    const manufacturer = document.getElementById('medicineManufacturer').value;
+    const description = document.getElementById('medicineDescription').value;
+    const uses = document.getElementById('medicineUses').value;
+    const sideEffects = document.getElementById('medicineSideEffects').value;
+    
+    // Determine status based on stock
+    let status = 'available';
+    if (stock === 0) {
+        status = 'out';
+    } else if (stock < 10) {
+        status = 'low';
+    }
+    
+    const newMedicine = {
+        id: Date.now(), // Generate unique ID
+        name: name,
+        price: price,
+        stock: stock,
+        dosage: dosage,
+        expiry: expiry,
+        manufacturer: manufacturer,
+        description: description,
+        uses: uses,
+        sideEffects: sideEffects,
+        status: status
+    };
+    
+    // Initialize category if it doesn't exist
+    if (!medicineData[category]) {
+        medicineData[category] = [];
+    }
+    
+    // Add medicine to the category
+    medicineData[category].push(newMedicine);
+    
+    // Save to localStorage
+    saveMedicineData();
+    
+    // Update the current view if we're viewing that category
+    const currentCategory = document.getElementById('categoryTitle')?.getAttribute('data-category');
+    if (currentCategory === category) {
+        showMedicineList(category);
+    }
+    
+    // Update category counts
+    updateCategoryCounts();
+    
+    alert('Medicine added successfully!');
+}
+
+// Function to save medicine data to localStorage
+function saveMedicineData() {
+    localStorage.setItem('medicineData', JSON.stringify(medicineData));
+}
+
+// Function to load medicine data from localStorage
+function loadMedicineData() {
+    const savedData = localStorage.getItem('medicineData');
+    if (savedData) {
+        const loadedData = JSON.parse(savedData);
+        // Merge loaded data with default data
+        Object.keys(loadedData).forEach(category => {
+            medicineData[category] = loadedData[category];
+        });
+    }
+    updateCategoryCounts();
+}
+
+// Function to update category counts
+function updateCategoryCounts() {
+    document.querySelectorAll('.category-card').forEach(card => {
+        const category = card.getAttribute('data-category');
+        const countElement = card.querySelector('p.text-muted');
+        if (countElement && medicineData[category]) {
+            const count = medicineData[category].length;
+            countElement.textContent = `${count} medicine${count !== 1 ? 's' : ''}`;
+        }
+    });
+}
+
+        // Chatbot Functionality
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotWindow = document.getElementById('chatbotWindow');
+        const closeChatbot = document.getElementById('closeChatbot');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const sendMessage = document.getElementById('sendMessage');
+
+        chatbotToggle.addEventListener('click', function() {
+            chatbotWindow.style.display = chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        closeChatbot.addEventListener('click', function() {
+            chatbotWindow.style.display = 'none';
+        });
+
+        const botResponses = {
+            'category': 'You can browse medicines by category. Click on any category to see the medicines in that group.',
+            'add': 'To add a new medicine, click the "Add Medicine" button. You can specify category, dosage, and other details.',
+            'search': 'You can search for specific medicines by name or category using the search functionality.',
+            'stock': 'Medicine stock levels are shown with colored badges: Available (green), Low Stock (orange), Out of Stock (red).',
+            'details': 'Click the dropdown arrow on any medicine card to view detailed information including uses and side effects.',
+            'help': 'I can help you with: browsing medicine categories, adding new medicines, checking stock levels, and viewing medicine details.',
+            'default': "I'm not sure I understand. I can help you with medicine management. Try asking about 'categories', 'adding medicines', or 'stock levels'."
+        };
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = message;
+            chatbotMessages.appendChild(messageDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        function getBotResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            for (const [key, response] of Object.entries(botResponses)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+            
+            return botResponses.default;
+        }
+
+        sendMessage.addEventListener('click', function() {
+            const message = chatbotInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                chatbotInput.value = '';
+                
+                setTimeout(() => {
+                    const response = getBotResponse(message);
+                    addMessage(response);
+                }, 1000);
+            }
+        });
+
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage.click();
+            }
+        });
+        
+        // Edit medicine functionality
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.edit-medicine')) {
+        const button = e.target.closest('.edit-medicine');
+        const medicineId = parseInt(button.getAttribute('data-id'));
+        const category = button.getAttribute('data-category');
+        editMedicine(medicineId, category);
+    }
+    
+    if (e.target.closest('.delete-medicine')) {
+        const button = e.target.closest('.delete-medicine');
+        const medicineId = parseInt(button.getAttribute('data-id'));
+        const category = button.getAttribute('data-category');
+        deleteMedicine(medicineId, category);
+    }
+});
+
+function editMedicine(id, category) {
+    const medicine = medicineData[category].find(m => m.id === id);
+    if (medicine) {
+        // Populate the add medicine form with existing data
+        document.getElementById('medicineName').value = medicine.name;
+        document.getElementById('medicineCategory').value = category;
+        document.getElementById('medicinePrice').value = medicine.price;
+        document.getElementById('medicineStock').value = medicine.stock;
+        document.getElementById('medicineDosage').value = medicine.dosage;
+        document.getElementById('medicineExpiry').value = medicine.expiry;
+        document.getElementById('medicineManufacturer').value = medicine.manufacturer;
+        document.getElementById('medicineDescription').value = medicine.description;
+        document.getElementById('medicineUses').value = medicine.uses;
+        document.getElementById('medicineSideEffects').value = medicine.sideEffects;
+        
+        // Change button text
+        document.getElementById('saveMedicineBtn').textContent = 'Update Medicine';
+        document.getElementById('saveMedicineBtn').setAttribute('data-edit-id', id);
+        document.getElementById('saveMedicineBtn').setAttribute('data-edit-category', category);
+        
+        // Show modal
+        new bootstrap.Modal(document.getElementById('addMedicineModal')).show();
+    }
+}
+
+function deleteMedicine(id, category) {
+    if (confirm('Are you sure you want to delete this medicine?')) {
+        medicineData[category] = medicineData[category].filter(m => m.id !== id);
+        saveMedicineData();
+        showMedicineList(category);
+        updateCategoryCounts();
+        alert('Medicine deleted successfully!');
+    }
+}
+
+        // Logout Functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutDropdown = document.getElementById('logoutDropdown');
+        
+       function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        alert('Logged out successfully!');
+        // Redirect to frontend/index.html
+        window.location.href = '../index.html';
+    }
+}
+
+        
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        if (logoutDropdown) logoutDropdown.addEventListener('click', logout);
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardProfileData();
+            loadMedicineData();
+        });
+    </script>
+</body>
+</html>

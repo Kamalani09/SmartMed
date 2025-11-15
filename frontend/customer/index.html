@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - SmartMed Pharmacy</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/customer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<script type="module">
+import { verifyAccess } from '../scripts/role-check.js';
+verifyAccess('customer');
+</script>
+
+<script type="module">
+  import { getRole, getToken } from '../scripts/auth.js';
+  const role = getRole();
+  const token = getToken();
+
+  if (!token) {
+    window.location.href = '../index.html';
+  } else if (window.location.pathname.includes('/customer/') && role !== 'customer') {
+    alert('Access denied');
+    window.location.href = '../index.html';
+  }
+</script>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <h1>SmartMed Pharmacy</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="cart-icon" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cartCount">0</span>
+                </div>
+                <div class="user-info">
+                <h2>Welcome, <span id="customerName">Teju</span> </h2>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <a href="#" onclick="showSection('dashboard')" class="active">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#" onclick="showSection('search')">
+                    <i class="fas fa-search"></i> Search Medicines
+                </a>
+                <a href="#" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-bag"></i> My Orders
+                </a>
+                <a href="#" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#" onclick="logout()" class="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+
+            <!-- Main Content Area -->
+            <div class="content">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="section active">
+                    <div class="section-header">
+                        <h2>Dashboard</h2>
+                        <p>Welcome to your SmartMed dashboard</p>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalOrders">0</h3>
+                                <p>Total Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pendingOrders">0</h3>
+                                <p>Pending Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-rupee-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalSpent">₹0</h3>
+                                <p>Total Spent</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="cartItems">0</h3>
+                                <p>Cart Items</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="btn-primary" onclick="showSection('search')">
+                                <i class="fas fa-search"></i> Search Medicines
+                            </button>
+                            <button class="btn-secondary" onclick="toggleCart()">
+                                <i class="fas fa-shopping-cart"></i> View Cart
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Search -->
+                    <div class="search-box">
+                        <h3>Quick Search</h3>
+                        <div class="search-input-group">
+                            <input type="text" id="quickSearch" placeholder="Search for medicines...">
+                            <button class="btn-primary" onclick="performQuickSearch()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="category-buttons">
+                            <button class="btn-secondary" onclick="filterByCategory('Pain Relief')">Pain Relief</button>
+                            <button class="btn-secondary" onclick="filterByCategory('Antibiotics')">Antibiotics</button>
+                            <button class="btn-secondary" onclick="filterByCategory('Vitamins')">Vitamins</button>
+                            <button class="btn-secondary" onclick="filterByCategory('Cardiology')">Cardiology</button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="recent-orders">
+                        <h3>Recent Orders</h3>
+                        <div id="recentOrders" class="orders-container">
+                            <!-- Recent orders will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Search Medicines Section -->
+                <section id="search" class="section">
+                    <div class="section-header">
+                        <h2>Search Medicines</h2>
+                        <p>Find and order your required medicines</p>
+                    </div>
+                    
+                    <div class="search-header">
+                        <div class="search-input-group">
+                            <input type="text" id="medicineSearch" placeholder="Search by name, generic, or category...">
+                            <button class="btn-primary" onclick="performSearch()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="search-filters">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="prescriptionOnly">
+                                Prescription Required Only
+                            </label>
+                            <select id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="Pain Relief">Pain Relief</option>
+                                <option value="Antibiotics">Antibiotics</option>
+                                <option value="Vitamins">Vitamins</option>
+                                <option value="Cardiology">Cardiology</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Respiratory">Respiratory</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="searchResults" class="medicines-grid">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </section>
+
+                <!-- My Orders Section -->
+                <section id="orders" class="section">
+                    <div class="section-header">
+                        <h2>My Orders</h2>
+                        <p>Track and manage your orders</p>
+                    </div>
+                    
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="loadOrders('all')">All Orders</button>
+                        <button class="filter-btn" onclick="loadOrders('pending')">Pending</button>
+                        <button class="filter-btn" onclick="loadOrders('approved')">Approved</button>
+                        <button class="filter-btn" onclick="loadOrders('completed')">Completed</button>
+                        <button class="filter-btn" onclick="loadOrders('rejected')">Rejected</button>
+                    </div>
+
+                    <div id="ordersList" class="orders-container">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profile" class="section">
+                    <div class="section-header">
+                        <h2>My Profile</h2>
+                        <p>Manage your personal information</p>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-info">
+                            <div class="profile-field">
+                                <label>Full Name:</label>
+                                <span id="profileName">Teju</span>
+                            </div>
+                            <div class="profile-field">
+                                <label>Email:</label>
+                                <span id="profileEmail">baddelatejeswini@gmail.com</span>
+                            </div>
+                            <div class="profile-field">
+                                <label>Phone:</label>
+                                <span id="profilePhone">8919155292</span>
+                            </div>
+                            <div class="profile-field">
+                                <label>Address:</label>
+                                <span id="profileAddress">Kadapa-</span>
+                                <button class="btn-edit" onclick="enableAddressEdit()">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Address Form (Initially Hidden) -->
+                    <div id="editAddressForm" class="profile-edit-form" style="display: none;">
+                        <div class="form-card">
+                            <h3>Edit Address</h3>
+                            <form id="addressForm" onsubmit="updateAddress(event)">
+                                <div class="form-group">
+                                    <label for="streetAddress">Street Address:</label>
+                                    <input type="text" id="streetAddress" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city">City:</label>
+                                        <input type="text" id="city" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="state">State:</label>
+                                        <input type="text" id="state" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="pincode">Pincode:</label>
+                                        <input type="text" id="pincode" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="country">Country:</label>
+                                        <input type="text" id="country" value="India" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" onclick="cancelAddressEdit()">Cancel</button>
+                                    <button type="submit" class="btn-primary">Save Address</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="prescription-upload">
+                        <h3>Upload Prescription</h3>
+                        <div class="upload-area">
+                            <input type="file" id="prescriptionUpload" accept=".jpg,.jpeg,.png,.pdf">
+                            <button class="btn-primary" onclick="uploadPrescription()">
+                                <i class="fas fa-upload"></i> Upload Prescription
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> Shopping Cart</h3>
+                <span class="close" onclick="toggleCart()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="cartItemsList">
+                    <!-- Cart items will be displayed here -->
+                </div>
+                <div class="cart-total">
+                    <strong>Total: ₹<span id="cartTotal">0.00</span></strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="toggleCart()">Continue Shopping</button>
+                <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-check"></i> Confirm Order</h3>
+                <span class="close" onclick="closeOrderModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="orderSummary">
+                    <!-- Order summary will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeOrderModal()">Cancel</button>
+                <button class="btn-primary" onclick="confirmOrder()">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Modal -->
+    <div id="billModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-receipt"></i> Order Bill</h3>
+                <span class="close" onclick="closeBillModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="billDetails">
+                    <!-- Bill details will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBillModal()">Close</button>
+                <button class="btn-primary" onclick="printBill()">
+                    <i class="fas fa-print"></i> Print Bill
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript Files -->
+    <script src="scripts/data.js"></script>
+    <script src="scripts/customer.js"></script>
+</body>
+</html>
