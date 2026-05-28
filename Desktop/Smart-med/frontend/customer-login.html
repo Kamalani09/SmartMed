@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMed - Customer Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #28a745;
+            --primary-dark: #1e7e34;
+            --primary-light: #d4edda;
+            --secondary: #6c757d;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 600px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .welcome-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-text h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .features {
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feature i {
+            margin-right: 10px;
+            color: var(--primary-light);
+        }
+
+        .login-right {
+            flex: 1;
+            background: var(--white);
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: var(--secondary);
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 8px;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #eee;
+        }
+
+        .divider span {
+            background: var(--white);
+            padding: 0 15px;
+            color: var(--secondary);
+        }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-social {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-social:hover {
+            background: #f8f9fa;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--secondary);
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Registration Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .login-left, .login-right {
+                padding: 30px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="logo-text">SmartMed</div>
+            </div>
+            <div class="welcome-text">
+                <h1>Welcome to SmartMed</h1>
+                <p>Your trusted partner for all your medical needs. Access your personal health dashboard and manage your prescriptions with ease.</p>
+            </div>
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Easy prescription management</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Track your medication history</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Quick medicine ordering</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Health tips and reminders</span>
+                </div>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="login-header">
+                <h2>Customer Login</h2>
+                <p>Sign in to your account to continue</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" class="form-control" id="username" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary" >
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </form>
+            <div class="divider">
+                <span>Or continue with</span>
+            </div>
+            <div class="social-login">
+                <button class="btn-social">
+                    <i class="fab fa-google"></i>
+                    Google
+                </button>
+                <button class="btn-social">
+                    <i class="fab fa-facebook"></i>
+                    Facebook
+                </button>
+            </div>
+            <div class="signup-link">
+                Don't have an account? <a href="#" id="showCustomerRegister">Sign up here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Registration Modal -->
+    <div class="modal" id="customerRegisterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create Customer Account</div>
+                <button class="modal-close" id="closeCustomerRegister">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="customerRegisterForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="regFirstName">First Name</label>
+                            <input type="text" class="form-control" id="regFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="regLastName">Last Name</label>
+                            <input type="text" class="form-control" id="regLastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regEmail">Email Address</label>
+                        <input type="email" class="form-control" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regPhone">Phone Number</label>
+                        <input type="tel" class="form-control" id="regPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regPassword">Password</label>
+                        <input type="password" class="form-control" id="regPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regConfirmPassword">Confirm Password</label>
+                        <input type="password" class="form-control" id="regConfirmPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regAddress">Address</label>
+                        <textarea class="form-control" id="regAddress" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="regTerms" required>
+                        <label for="regTerms">I agree to the Terms of Service and Privacy Policy</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ===============================
+    // CUSTOMER LOGIN FUNCTIONALITY
+    // ===============================
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+    const response = await fetch('https://smartmed-dmrb.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password ,role: "customer"})
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.token) {
+    alert('Login successful!');
+
+    // Save token + role
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('userRole', data.user.role);
+
+    // Redirect based on role
+    if (data.user.role === "customer") {
+        window.location.href = "customer/index.html";
+    } else if (data.user.role === "owner") {
+        window.location.href = "owner/index.html";
+    } else if (data.user.role === "vendor") {
+        window.location.href = "vendor/dashboard.html";
+    } else {
+        alert("Unknown role. Cannot redirect.");
+    }
+
+} else {
+    alert(data.message || 'Invalid login credentials. Please try again.');
+    document.getElementById('password').value = '';
+}
+
+} catch (error) {
+    console.error('Error:', error);
+    alert('Server not reachable. Please check if backend is running.');
+}
+
+    });
+
+    // ===============================
+    // REGISTRATION MODAL CONTROLS
+    // ===============================
+    const customerRegisterModal = document.getElementById('customerRegisterModal');
+    const showCustomerRegister = document.getElementById('showCustomerRegister');
+    const closeCustomerRegister = document.getElementById('closeCustomerRegister');
+
+    showCustomerRegister.addEventListener('click', function() {
+        customerRegisterModal.style.display = 'flex';
+    });
+
+    closeCustomerRegister.addEventListener('click', function() {
+        customerRegisterModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(e) {
+        if (e.target === customerRegisterModal) {
+            customerRegisterModal.style.display = 'none';
+        }
+    });
+
+    // ===============================
+    // CUSTOMER REGISTRATION FUNCTIONALITY
+    // ===============================
+    document.getElementById('customerRegisterForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName = document.getElementById('regLastName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const address = document.getElementById('regAddress').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+
+    // Check password match
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+
+    // Build final correct user object
+    const userData = {
+        name: `${firstName} ${lastName}`,
+        email,
+        password,
+        phone,
+        address,
+        role: "customer"   // 🔥 REQUIRED
+    };
+
+    try {
+        const response = await fetch('https://smartmed-dmrb.onrender.com/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Account created successfully! You can now log in.');
+            customerRegisterModal.style.display = 'none';
+            document.getElementById('customerRegisterForm').reset();
+        } else {
+            alert(data.message || 'Registration failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Server not reachable. Please check backend is running.');
+    }
+});
+
+</script>
+
+</body>
+</html>
