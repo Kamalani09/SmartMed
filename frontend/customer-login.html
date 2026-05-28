@@ -536,11 +536,11 @@
 
     // Redirect based on role
     if (data.user.role === "customer") {
-        window.location.href = "customer/index.html";
+        window.location.href = "../customer/index.html";
     } else if (data.user.role === "owner") {
-        window.location.href = "owner/index.html";
+        window.location.href = "../owner/index.html";
     } else if (data.user.role === "vendor") {
-        window.location.href = "vendor/dashboard.html";
+        window.location.href = "../vendor/dashboard.html";
     } else {
         alert("Unknown role. Cannot redirect.");
     }
