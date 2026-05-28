@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMED - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="module">
+import { verifyAccess } from '../scripts/role-check.js';
+verifyAccess('owner');
+</script>
+
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --accent-color: #8bc34a;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #e0e0e0;
+            --card-bg: #ffffff;
+            --body-bg: #f5f5f5;
+        }
+	.profile-img-sm {
+	    width: 40px;
+	    height: 40px;
+	    border-radius: 50%;
+	    object-fit: cover;
+	    border: 2px solid var(--primary-light);
+	    background-color: var(--primary-light);
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    color: white;
+	    font-size: 1rem;
+	}
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+            background-color: var(--card-bg);
+        }
+        
+        
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .stats-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--primary-dark);
+        }
+        
+        .stats-card p {
+            color: #666;
+            margin-bottom: 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transition:none;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transition:none;
+        }
+        
+        .table th {
+            background-color: var(--light-bg);
+            color: var(--primary-dark);
+        }
+        
+        .badge-expired {
+            background-color: #f44336;
+        }
+        
+        .badge-low {
+            background-color: #ff9800;
+        }
+        
+        .badge-out {
+            background-color: #f44336;
+        }
+        
+        .badge-available {
+            background-color: var(--primary-color);
+        }
+        
+        .profile-img-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-icon {
+            position: relative;
+        }
+        
+        
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chatbot-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .chatbot-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chatbot-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: var(--light-bg);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background-color: var(--primary-light);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .chatbot-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            outline: none;
+        }
+        
+        .chatbot-input button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .chatbot-window {
+                width: 300px;
+                right: -50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar d-md-block">
+                <div class="text-center mb-4">
+                    <h3 class="text-white">SmartMED</h3>
+                    <p class="text-light">Shop Owner Dashboard</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-cart.html">
+                            <i class="fas fa-shopping-cart"></i> Manage Cart
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="medicines.html">
+                            <i class="fas fa-pills"></i> Medicines
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="expiry-list.html">
+                            <i class="fas fa-calendar-times"></i> Expiry List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="threshold-list.html">
+                            <i class="fas fa-exclamation-triangle"></i> Threshold List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="out-of-stock.html">
+                            <i class="fas fa-times-circle"></i> Out of Stock
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sales-profits.html">
+                            <i class="fas fa-chart-line"></i> Sales & Profits
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link" href="#" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Header -->
+                <div class="header">
+                    <h4 class="mb-0">Shop Owner Dashboard</h4>
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon me-3">
+                            <i class="fas fa-bell fa-lg text-muted"></i>
+                            <span class="notification-badge">3</span>
+                        </div>
+				<div class="dropdown">
+			   		 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+					<div class="profile-img-sm me-2" id="headerProfileImage">
+				    	<i class="fas fa-user"></i>
+					</div>
+					<span class="ownerName"> </span>
+			   		 </a>
+			   		 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+						<li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i> Profile</a></li>
+						<li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="#" id="logoutDropdown"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+			    		</ul>
+				</div>
+                    </div>
+                </div>
+                
+                <!-- Welcome Message -->
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-hand-wave me-2"></i><h2>Welcome, <span class="ownerName">Owner</span> </h2>
+
+</h5>
+                    <p class="mb-0">Welcome to your SmartMED dashboard. Manage your pharmacy efficiently from here.</p>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <i class="fas fa-pills"></i>
+                            <h3>245</h3>
+                            <p>Available Medicines</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>18</h3>
+                            <p>Pending Orders</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>12</h3>
+                            <p>Low Stock Items</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <i class="fas fa-calendar-times"></i>
+                            <h3>5</h3>
+                            <p>Expiring Soon</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>Recent Orders</span>
+                                <a href="manage-cart.html" style="color:white;">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Customer</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>#ORD-7842</td>
+                                                <td>Robert Johnson</td>
+                                                <td>$45.50</td>
+                                                <td><span class="badge bg-warning">Pending</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">Accept</button>
+                                                    <button class="btn btn-sm btn-outline-secondary">View</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-7841</td>
+                                                <td>Sarah Williams</td>
+                                                <td>$32.75</td>
+                                                <td><span class="badge bg-warning">Pending</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">Accept</button>
+                                                    <button class="btn btn-sm btn-outline-secondary">View</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-7840</td>
+                                                <td>Michael Brown</td>
+                                                <td>$67.20</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary">View</button>
+                                                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-7839</td>
+                                                <td>Jennifer Lee</td>
+                                                <td>$28.90</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary">View</button>
+                                                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Medicine Inventory -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>Medicine Inventory</span>
+                                <a href="medicines.html" style="color:white;">
+                    			View More
+               		 </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Medicine Name</th>
+                                                <th>Category</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Expiry Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Paracetamol 500mg</td>
+                                                <td>Pain Relief</td>
+                                                <td>$5.99</td>
+                                                <td>12</td>
+                                                <td>15/12/2024</td>
+                                                <td><span class="badge badge-low">Low Stock</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Amoxicillin 250mg</td>
+                                                <td>Antibiotics</td>
+                                                <td>$12.50</td>
+                                                <td>8</td>
+                                                <td>20/10/2024</td>
+                                                <td><span class="badge badge-low">Low Stock</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Vitamin C 1000mg</td>
+                                                <td>Vitamins</td>
+                                                <td>$8.75</td>
+                                                <td>0</td>
+                                                <td>05/08/2025</td>
+                                                <td><span class="badge badge-out">Out of Stock</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Cetirizine 10mg</td>
+                                                <td>Allergy</td>
+                                                <td>$6.50</td>
+                                                <td>45</td>
+                                                <td>18/03/2025</td>
+                                                <td><span class="badge badge-available">Available</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container">
+        <button class="chatbot-btn" id="chatbotToggle">
+            <i class="fas fa-robot"></i>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h6 class="mb-0">SmartMED Assistant</h6>
+                <button class="btn-close btn-close-white" id="closeChatbot"></button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot-message">
+                    Hello! I'm your SmartMED assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="Type your message...">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // ===============================
+  // SHOW OWNER NAME IN ALL PLACES
+  // ===============================
+  async function loadOwnerName() {
+    const token = localStorage.getItem('token') || localStorage.getItem('ms_token');
+    if (!token) {
+      console.warn('⚠️ No token found.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await response.json();
+      console.log('✅ Owner Data:', data);
+
+      if (response.ok && data.name) {
+        // Update all elements with class="ownerName"
+        const ownerNameElements = document.querySelectorAll('.ownerName');
+        ownerNameElements.forEach(el => {
+          el.textContent = data.name;
+        });
+      } else {
+        console.warn('⚠️ Unable to fetch owner name:', data.message);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching owner info:', error);
+    }
+  }
+
+  // ===============================
+  // PAGE LOAD EVENTS
+  // ===============================
+  document.addEventListener('DOMContentLoaded', async function () {
+    await loadOwnerName(); // Load owner's name into all "ownerName" elements
+  });
+
+  // ===============================
+  // CHATBOT FUNCTIONALITY
+  // ===============================
+  const chatbotToggle = document.getElementById('chatbotToggle');
+  const chatbotWindow = document.getElementById('chatbotWindow');
+  const closeChatbot = document.getElementById('closeChatbot');
+  const chatbotMessages = document.getElementById('chatbotMessages');
+  const chatbotInput = document.getElementById('chatbotInput');
+  const sendMessage = document.getElementById('sendMessage');
+
+  chatbotToggle?.addEventListener('click', function () {
+    chatbotWindow.style.display =
+      chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+  });
+
+  closeChatbot?.addEventListener('click', function () {
+    chatbotWindow.style.display = 'none';
+  });
+
+  const botResponses = {
+    hello: 'Hello! How can I assist you with your pharmacy management today?',
+    hi: 'Hi there! What can I help you with?',
+    help: 'I can help you with medicine inventory, orders, stock management, and general queries about the system.',
+    medicine:
+      'You can manage medicines in the Medicines section. Add new medicines, update stock, or check expiry dates.',
+    order: 'Check the Recent Orders section to manage customer orders.',
+    stock: 'Monitor stock levels in the Medicine Inventory section.',
+    expiry: 'Check the Expiry List for medicines expiring soon.',
+    vendor: 'Use the Request Vendor section to order new stock.',
+    sales: 'View your sales and profit reports in the Sales & Profits section.',
+    profile: 'Update your personal and shop information in the Profile section.',
+    default:
+      "I'm not sure I understand. Could you please rephrase your question?"
+  };
+
+  function addMessage(message, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    messageDiv.textContent = message;
+    chatbotMessages.appendChild(messageDiv);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+  }
+
+  function getBotResponse(userMessage) {
+    const lowerMessage = userMessage.toLowerCase();
+    for (const [key, response] of Object.entries(botResponses)) {
+      if (lowerMessage.includes(key)) return response;
+    }
+    return botResponses.default;
+  }
+
+  sendMessage?.addEventListener('click', function () {
+    const message = chatbotInput.value.trim();
+    if (message) {
+      addMessage(message, true);
+      chatbotInput.value = '';
+      setTimeout(() => addMessage(getBotResponse(message)), 1000);
+    }
+  });
+
+  chatbotInput?.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sendMessage.click();
+  });
+
+  // ===============================
+  // LOGOUT FUNCTIONALITY
+  // ===============================
+  const logoutBtn = document.getElementById('logoutBtn');
+  const logoutDropdown = document.getElementById('logoutDropdown');
+
+  function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('profileData');
+      alert('Logged out successfully!');
+      window.location.href = '../index.html';
+    }
+  }
+
+  logoutBtn?.addEventListener('click', logout);
+  logoutDropdown?.addEventListener('click', logout);
+</script>
+
+<!-- Role Validation -->
+<script type="module">
+  import { getRole, getToken } from '../scripts/auth.js';
+  const role = getRole();
+  const token = getToken();
+
+  if (!token) {
+    window.location.href = '../MSA_Login/index.html';
+  } else if (window.location.pathname.includes('/owner/') && role !== 'owner') {
+    alert('Access denied');
+    window.location.href = '../MSA_Login/index.html';
+  }
+</script>
+
+
+</html>

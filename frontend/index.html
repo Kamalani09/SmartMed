@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SmartMed — Medicine Shop Automation</title>
+  <meta name="description" content="SmartMed — Smart automation for medicine stores: inventory, expiry alerts, vendor management, JIT ordering and daily reports." />
+  <style>
+    :root{
+      --bg1: #0f766e;    /* deep teal */
+      --bg2: #06b6a4;    /* bright teal */
+      --accent: #34d399; /* soft green */
+      --card: rgba(255,255,255,0.96);
+      --glass: rgba(255,255,255,0.08);
+      --muted: #1f2937;
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.18);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),#064e4a);color:var(--muted);-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:28px;}
+
+    /* NAV */
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;padding:16px 0;color:#fff;
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1.15rem}
+    .brand .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--bg2));display:flex;align-items:center;justify-content:center;color:#013;box-shadow:0 6px 20px rgba(2,6,23,0.2);
+      font-weight:800;font-size:1.1rem;
+    }
+    .nav-links{display:flex;gap:18px;align-items:center}
+    .nav-links a{color:rgba(255,255,255,0.92);font-weight:600}
+    .cta{
+      background:transparent;border:1px solid rgba(255,255,255,0.12);padding:8px 14px;border-radius:12px;color:#fff;font-weight:700;
+      backdrop-filter: blur(6px);
+    }
+
+    /* HERO */
+    .hero{
+      display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;padding:40px 0;
+    }
+    .hero-left{
+      color:white;
+    }
+    h1{
+      font-size:2.6rem;margin:0 0 14px;line-height:1.03;
+      text-shadow:0 6px 30px rgba(2,6,23,0.25);
+    }
+    p.lead{font-size:1.05rem;opacity:0.95;margin:0 0 20px;max-width:60ch}
+    .hero-buttons{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:12px;font-weight:700;border:none;cursor:pointer;
+      box-shadow:var(--shadow);transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--bg2));color:#042f2b}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.12);color:white}
+
+    /* Login cards column */
+    .login-column{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border-radius:20px;padding:18px;backdrop-filter: blur(8px);box-shadow:0 12px 40px rgba(2,6,23,0.25);
+    }
+    .login-title{color:#e6fff9;font-weight:800;margin:6px 0 18px;font-size:1.05rem}
+    .login-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .login-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.98), var(--card));
+      border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .login-card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(2,6,23,0.18)}
+    .login-icon{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .cust{background:linear-gradient(135deg,#bbf7d0,#86efac);color:#064e3b}
+    .owner{background:linear-gradient(135deg,#dcfce7,#86efac);color:#064e3b}
+    .vendor{background:linear-gradient(135deg,#bbf7d0,#5eead4);color:#064e3b}
+    .login-info{font-weight:700}
+    .login-sub{font-weight:500;font-size:.9rem;color:#374151}
+
+    /* FEATURES / ABOUT */
+    .card{
+      background:var(--card);border-radius:14px;padding:22px;box-shadow:var(--shadow);margin-top:18px;
+    }
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:14px}
+    .feature{
+      padding:16px;border-radius:12px;background:linear-gradient(180deg,rgba(6,182,164,0.06),rgba(6,182,164,0.02));
+      min-height:110px;display:flex;flex-direction:column;gap:8px;justify-content:flex-start;
+    }
+    .feature h4{margin:0;font-size:1rem;color:#083; font-weight:800}
+    .feature p{margin:0;font-size:.93rem;color:#03564f;opacity:0.9}
+
+    /* CURVE separator (SVG) placed as element */
+    .wave{display:block;margin-top:12px}
+
+    /* CONTACT */
+    .contact-row{display:flex;gap:18px;align-items:flex-start;margin-top:18px;flex-wrap:wrap}
+    .contact-card{flex:1;min-width:220px;background:linear-gradient(180deg,#ffffff,#f7fffb);padding:16px;border-radius:12px}
+    .small{font-size:.9rem;color:#065f55}
+
+    /* FOOTER */
+    footer{padding:28px 0;color:#e6fff9;text-align:center;opacity:0.95}
+
+    /* RESPONSIVE */
+    @media (max-width:1000px){
+      .hero{grid-template-columns:1fr;gap:18px}
+      .features{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:640px){
+      .nav-links{display:none}
+      h1{font-size:2rem}
+      .features{grid-template-columns:1fr}
+      .login-grid{grid-template-columns:1fr}
+    }
+
+    /* subtle entrance animation */
+    .fade-up{opacity:0;transform:translateY(10px);animation:fadeUp .7s forwards}
+    @keyframes fadeUp{to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo">SM</div>
+        <div>
+          <div style="font-size:.95rem">SmartMed</div>
+          <div style="font-size:.72rem;opacity:.9">Medicine Shop Automation</div>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#login">Login</a>
+        <a href="#contact">Contact</a>
+        <a class="cta" href="#contact">Get in Touch</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="home" class="hero" aria-labelledby="hero-heading">
+      <div class="hero-left">
+        <h1 id="hero-heading">SmartMed — Smart automation for modern medicine stores</h1>
+        <p class="lead">A lightweight, efficient system to manage medicine inventory, generate reorder lists using JIT-inspired thresholds, track expiry, automate vendor orders and print receipts — so shop owners can focus on customers, not paperwork.</p>
+
+        <div class="hero-buttons fade-up" style="animation-delay:.12s">
+          <button class="btn btn-primary" onclick="document.getElementById('login').scrollIntoView({behavior:'smooth'})">
+            Start (Login)
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="transform:translateY(-1px)"><path d="M5 12h14M13 5l7 7-7 7" stroke="#04332d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <a class="btn btn-outline" href="#about">Learn more</a>
+        </div>
+
+        <div class="card fade-up" style="margin-top:18px;animation-delay:.18s">
+          <strong>Quick facts</strong>
+          <p class="small" style="margin-top:8px">• Maintain minimal inventory using threshold-based reorder calculation (average weekly sales) • Daily expiry reports and vendor-wise expired item lists • Print vendor cheques and cash receipts • Track revenue, profit, and vendor-payments for any period</p>
+        </div>
+      </div>
+
+      <aside class="login-column" id="login" aria-label="Login options">
+        <div class="login-title">Choose your login</div>
+        <div class="login-grid">
+          <a class="login-card" href=".\customer-login.html" title="Customer Login">
+            <div class="login-icon cust" aria-hidden>
+              <!-- customer icon -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#064e3b" stroke-width="1.2" /><path d="M5 20c1.5-3 4.5-4.5 7-4.5s5.5 1.5 7 4.5" stroke="#064e3b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="login-info">
+              <div>Customer</div>
+              <div class="login-sub">Browse medicines, place orders & view receipts</div>
+            </div>
+          </a>
+
+          <a class="login-card" href=".\owner-login.html" title="Owner Login">
+            <div class="login-icon owner" aria-hidden>
+              <!-- owner icon -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#064e3b" stroke-width="1.2"/><path d="M8 14h8M8 10h8" stroke="#064e3b" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="login-info">
+              <div>Owner / Manager</div>
+              <div class="login-sub">Inventory control, threshold settings, reports & vendor payments</div>
+            </div>
+          </a>
+
+          <a class="login-card" href="C:\Users\Raja_Kamalani\OneDrive\Desktop\Smart-med\frontend.\vendor-login.html" title="Vendor Login">
+            <div class="login-icon vendor" aria-hidden>
+              <!-- vendor icon -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 7h18M8 21V7M16 21V7" stroke="#064e3b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="login-info">
+              <div>Vendor</div>
+              <div class="login-sub">Receive orders, update supply, and view payments</div>
+            </div>
+          </a>
+        </div>
+
+        <div style="margin-top:16px;color:#e9fff8;font-weight:700">Why SmartMed?</div>
+        <div style="margin-top:8px;color:#e9fff8;line-height:1.4;font-size:.95rem">
+          • Faster reorder processing • Automated expiry & vendor reports • Accurate sales receipts • Vendor code management
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <!-- CURVED WAVE -->
+  <svg class="wave" viewBox="0 0 1440 120" preserveAspectRatio="none" style="display:block;width:100%;margin-top:6px">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1">
+        <stop offset="0" stop-color="#e6fffa" stop-opacity="0.9"/>
+        <stop offset="1" stop-color="#e6fff9" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#g1)" d="M0,48 C220,150 440,2 720,56 C1000,110 1220,20 1440,80 L1440 120 L0 120 Z"></path>
+  </svg>
+
+  <!-- ABOUT & FEATURES -->
+  <div class="container" id="about">
+    <div class="card fade-up" style="animation-delay:.12s">
+      <h2 style="margin-top:0">About SmartMed</h2>
+      <p class="small">SmartMed is a Medicine Shop Automation (MSA) system designed for retail medicine shops that manage a large variety of medicines from multiple vendors. It helps shop owners maintain minimal inventory using a Just-in-Time inspired philosophy while ensuring continuous sales through automated reorder alerts. Key capabilities include threshold calculation (based on average weekly sales), daily expiry reports, vendor-wise expired item lists, cheque generation for vendors on supply, printing cash receipts for sales, and generating revenue/profit reports for any period.</p>
+
+      <div class="features" style="margin-top:18px">
+        <div class="feature">
+          <h4>Threshold & Reorder</h4>
+          <p>System calculates per-item reorder thresholds using average weekly sales so owners can reorder just-in-time and avoid excess stock.</p>
+        </div>
+
+        <div class="feature">
+          <h4>Expiry Management</h4>
+          <p>Generate daily list of expired items and vendor-wise expired lists so replacements can be requested automatically.</p>
+        </div>
+
+        <div class="feature">
+          <h4>Vendor Management</h4>
+          <p>Store vendor name, address and codes; print cheques and track vendor-wise payments and supplied medicine codes.</p>
+        </div>
+
+        <div class="feature">
+          <h4>Receiving Supply</h4>
+          <p>Enter item code, batch number, expiry and quantity on receipt; system prints supply acknowledgement and updates stock.</p>
+        </div>
+
+        <div class="feature">
+          <h4>Sales & Receipts</h4>
+          <p>Enter code and quantity sold to generate cash receipt instantly; sales update inventory and feed into revenue reports.</p>
+        </div>
+
+        <div class="feature">
+          <h4>Revenue & Profit</h4>
+          <p>Generate period-wise revenue and profit statements and vendor-wise payment summaries for accounting and auditing.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT ROW -->
+   <div class="container" id="contact">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:18px">
+      <div class="contact-card">
+        <h3 style="margin-top:0">Contact</h3>
+        <p class="small">SmartMed Project • For demo & implementation enquiries</p>
+        <p class="small" style="margin-top:10px"><strong>Email:</strong> support@smartmed.example</p>
+        <p class="small"><strong>Phone:</strong> +91 98765 43210</p>
+        <p class="small"><strong>Address:</strong> 12 Health St, Wellness Park, Hyderabad, India</p>
+      </div>
+
+      <div class="contact-card" style="min-width:300px;">
+        <h3 style="margin-top:0">How SmartMed helps day-to-day</h3>
+        <ul style="margin:8px 0 0 18px;padding:0;color:#054f44">
+          <li style="margin-bottom:6px">Automates reorder lists at end of each day</li>
+          <li style="margin-bottom:6px">Prepares vendor-wise expired lists for replacement</li>
+          <li style="margin-bottom:6px">Prints vendor cheque for supplied batches</li>
+          <li style="margin-bottom:6px">Calculates average weekly sales to set thresholds</li>
+        </ul>
+      </div>
+    </div>
+</div>
+
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px;color:#e9fff8">
+          <div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--bg2));display:flex;align-items:center;justify-content:center;font-weight:800">SM</div>
+          <div>
+            <div style="font-weight:700">SmartMed</div>
+            <div style="font-size:.85rem;opacity:.9">Medicine Shop Automation</div>
+          </div>
+        </div>
+
+        <div style="font-size:.95rem;color:#e9fff8">© <span id="year"></span> SmartMed — All rights reserved</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // small accessibility: keyboard focus for login cards
+    document.querySelectorAll('.login-card').forEach((c)=>{
+      c.setAttribute('tabindex','0');
+      c.addEventListener('keypress',(e)=>{ if(e.key==='Enter' || e.key===' ') c.click(); });
+    });
+
+    // Smooth scroll for internal anchors
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        const id = this.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el) el.scrollIntoView({behavior:'smooth'});
+      });
+    });
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  const registerLink = document.getElementById('registerLink');
+
+  // LOGIN SUBMIT
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+    console.log('Login response:', data);
+
+    if (response.ok) {
+      // Save to localStorage
+      localStorage.setItem('ms_token', data.token);
+      localStorage.setItem('ms_role', data.role);
+      localStorage.setItem('ms_username', data.username);
+
+      alert('Login successful!');
+
+      // Redirect by role
+      if (data.role === 'owner') {
+        window.location.href = '../owner/dashboard.html';
+      } else if (data.role === 'vendor') {
+        window.location.href = '../vendor/dashboard.html';
+      } else {
+        window.location.href = '../customer/index.html';
+      }
+    } else {
+      alert(data.message || 'Login failed');
+    }
+  });
+
+  // TEMP REGISTER TEST
+  registerLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const username = prompt('Enter username:');
+    const email = prompt('Enter email:');
+    const password = prompt('Enter password:');
+    const role = prompt('Enter role (owner/vendor/customer):');
+
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password, role })
+    });
+    const data = await res.json();
+    alert(data.message);
+  });
+});
+</script>
+
+</body>
+</html>
+

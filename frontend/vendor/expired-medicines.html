@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMed - Expired Medicines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #28a745;
+            --primary-dark: #1e7e34;
+            --primary-light: #d4edda;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --sidebar-width: 250px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+
+        .sidebar-menu ul {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s;
+        }
+
+        /* Header Styles */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--light);
+            border-radius: 30px;
+            padding: 8px 15px;
+            width: 400px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 5px 10px;
+            width: 100%;
+            outline: none;
+        }
+
+        .search-bar i {
+            color: var(--secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification {
+            position: relative;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Content Area Styles */
+        .content {
+            padding: 30px;
+        }
+
+        .page-title {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            color: var(--secondary);
+        }
+
+        /* Expired Medicines Summary Cards */
+        .expired-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-card-title {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .summary-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .summary-card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-card-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        /* Critical Alert Banner */
+        .critical-alert {
+            background: linear-gradient(135deg, #dc3545, #e4606d);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .critical-alert-icon {
+            font-size: 2rem;
+        }
+
+        .critical-alert-content {
+            flex: 1;
+        }
+
+        .critical-alert-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* Expiring Soon Alert */
+        .warning-alert {
+            background: linear-gradient(135deg, #ffc107, #ffce3a);
+            color: #856404;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .warning-alert-icon {
+            font-size: 2rem;
+        }
+
+        .warning-alert-content {
+            flex: 1;
+        }
+
+        .warning-alert-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Chart Styles */
+        .chart {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder {
+            text-align: center;
+            color: var(--secondary);
+        }
+
+        .chart-placeholder i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* Expired Medicines Filter Section */
+        .expired-filter {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: black;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .bulk-actions.active {
+            display: block;
+        }
+
+        .bulk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bulk-selection {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        /* Expired Medicines Table */
+        .expired-medicines-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-expired {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-expiring {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-critical {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+
+        .action-view {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .action-dispose {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .action-return {
+            background-color: var(--warning);
+            color: black;
+        }
+
+        .action-restock {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Medicine Details Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .medicine-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .medicine-image {
+            width: 100%;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        /* Disposal Timeline */
+        .timeline {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .timeline-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .medicine-details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .sidebar-header h2, .sidebar-header p, .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .search-bar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .expired-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .search-bar {
+                display: none;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .table-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .expired-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 0 15px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .filter-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>SmartMed</h2>
+            <p>Vendor Dashboard</p>
+        </div>
+        <div class="sidebar-menu">
+            <ul>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> <span>Orders</span></a></li>
+                <li><a href="sales.html"><i class="fas fa-chart-line"></i> <span>Sales</span></a></li>
+                <li><a href="tax-reports.html"><i class="fas fa-file-invoice-dollar"></i> <span>Tax Reports</span></a></li>
+                <li><a href="pending-orders.html"><i class="fas fa-clock"></i> <span>Pending Orders</span></a></li>
+                <li><a href="completed-orders.html"><i class="fas fa-check-circle"></i> <span>Completed Orders</span></a></li>
+                <li><a href="expired-medicines.html" class="active"><i class="fas fa-exclamation-triangle"></i> <span>Expired Medicines</span></a></li>
+                <li><a href="stock-analytics.html"><i class="fas fa-chart-bar"></i> <span>Stock Analytics</span></a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li><a href="../index.html"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search expired medicines, batches, or categories...">
+            </div>
+            <div class="user-actions">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">12</div>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">VM</div>
+                    <span>Vendor Manager</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <div>
+                    <h1>Expired Medicines</h1>
+                    <p>Manage expired and expiring medicines with proper disposal tracking</p>
+                </div>
+                <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Disposal Record</button>
+            </div>
+
+            <!-- Expired Medicines Summary -->
+            <div class="expired-summary">
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <div class="summary-card-title">Total Expired</div>
+                        <div class="summary-card-icon" style="background-color: var(--danger);">
+                            <i class="fas fa-skull-crossbones"></i>
+                        </div>
+                    </div>
+                    <div class="summary-card-value">47</div>
+                    <div class="summary-card-change negative">
+                        <i class="fas fa-arrow-up"></i> 8 new this week
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <div class="summary-card-title">Expiring Soon</div>
+                        <div class="summary-card-icon" style="background-color: var(--warning);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="summary-card-value">23</div>
+                    <div class="summary-card-change negative">
+                        <i class="fas fa-arrow-up"></i> 5 in next 7 days
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <div class="summary-card-title">Stock Value Lost</div>
+                        <div class="summary-card-icon" style="background-color: #6c757d;">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                    </div>
+                    <div class="summary-card-value">₹1,85,600</div>
+                    <div class="summary-card-change negative">
+                        <i class="fas fa-arrow-up"></i> ₹42,500 this month
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <div class="summary-card-title">Disposed This Month</div>
+                        <div class="summary-card-icon" style="background-color: var(--primary);">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                    <div class="summary-card-value">32</div>
+                    <div class="summary-card-change positive">
+                        <i class="fas fa-arrow-up"></i> 12.5% from last month
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Alert Banner -->
+            <div class="critical-alert">
+                <div class="critical-alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="critical-alert-content">
+                    <div class="critical-alert-title">Critical: Expired Medicines Detected</div>
+                    <div class="critical-alert-message">You have 12 critical expired medicines that require immediate disposal. These include controlled substances and antibiotics.</div>
+                </div>
+                <button class="btn btn-danger">Dispose Critical Items</button>
+            </div>
+
+            <!-- Expiring Soon Alert -->
+            <div class="warning-alert">
+                <div class="warning-alert-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="warning-alert-content">
+                    <div class="warning-alert-title">Medicines Expiring Soon</div>
+                    <div class="warning-alert-message">23 medicines will expire within the next 30 days. Consider returning to supplier or offering discounts.</div>
+                </div>
+                <button class="btn btn-warning">View Expiring Soon</button>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-container">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Expiry Trend by Month</div>
+                        <div class="chart-actions">
+                            <button class="btn btn-outline"><i class="fas fa-calendar"></i> Monthly</button>
+                        </div>
+                    </div>
+                    <div class="chart" id="expiryTrendChart">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Monthly Expiry Trend</p>
+                            <p>Current Month: 12 expired</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Expiry by Category</div>
+                        <div class="chart-actions">
+                            <button class="btn btn-outline"><i class="fas fa-filter"></i> Filter</button>
+                        </div>
+                    </div>
+                    <div class="chart" id="categoryChart">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-pie"></i>
+                            <p>Category-wise Expiry</p>
+                            <p>Highest: Antibiotics (38%)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions" id="bulkActions">
+                <div class="bulk-header">
+                    <div class="bulk-selection" id="bulkSelection">0 medicines selected</div>
+                    <div class="bulk-buttons">
+                        <button class="btn btn-danger" id="bulkDispose"><i class="fas fa-trash-alt"></i> Dispose Selected</button>
+                        <button class="btn btn-warning" id="bulkReturn"><i class="fas fa-undo"></i> Return to Supplier</button>
+                        <button class="btn btn-outline" id="bulkCancel"><i class="fas fa-times"></i> Clear Selection</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expired Medicines Filter -->
+            <div class="expired-filter">
+                <div class="filter-header">
+                    <div class="filter-title">Filter Expired Medicines</div>
+                    <div class="filter-actions">
+                        <button class="btn btn-outline"><i class="fas fa-filter"></i> Apply Filters</button>
+                        <button class="btn btn-outline"><i class="fas fa-redo"></i> Reset</button>
+                    </div>
+                </div>
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="expired">Expired</option>
+                            <option value="expiring">Expiring Soon</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Medicine Category</label>
+                        <select class="filter-select">
+                            <option value="">All Categories</option>
+                            <option value="antibiotics">Antibiotics</option>
+                            <option value="painkillers">Painkillers</option>
+                            <option value="vitamins">Vitamins</option>
+                            <option value="chronic">Chronic Disease</option>
+                            <option value="firstaid">First Aid</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Expiry Date</label>
+                        <select class="filter-select">
+                            <option value="">All Dates</option>
+                            <option value="today">Expired Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="future">Expiring Soon</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Stock Value</label>
+                        <select class="filter-select">
+                            <option value="">Any Value</option>
+                            <option value="0-5000">₹0 - ₹5,000</option>
+                            <option value="5000-20000">₹5,000 - ₹20,000</option>
+                            <option value="20000+">₹20,000+</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expired Medicines Table -->
+            <div class="expired-medicines-container">
+                <div class="table-header">
+                    <div class="table-title">Expired Medicines List</div>
+                    <div class="table-actions">
+                        <button class="btn btn-outline" id="selectAllBtn"><i class="fas fa-check-square"></i> Select All</button>
+                        <button class="btn btn-outline"><i class="fas fa-download"></i> Export Report</button>
+                        <button class="btn btn-primary"><i class="fas fa-file-pdf"></i> Generate Compliance Report</button>
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>Medicine Name</th>
+                            <th>Batch No.</th>
+                            <th>Category</th>
+                            <th>Expiry Date</th>
+                            <th>Quantity</th>
+                            <th>Stock Value (₹)</th>
+                            <th>Status</th>
+                            <th>Days Expired</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="PARA500"></td>
+                            <td>Paracetamol 500mg</td>
+                            <td>BATCH-78901</td>
+                            <td>Painkillers</td>
+                            <td>Oct 15, 2023</td>
+                            <td>150 strips</td>
+                            <td>₹18,000</td>
+                            <td><span class="status-badge status-critical">Critical</span></td>
+                            <td>14</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('PARA500')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-dispose" data-medicine="PARA500"><i class="fas fa-trash-alt"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="AMOX250"></td>
+                            <td>Amoxicillin 250mg</td>
+                            <td>BATCH-78902</td>
+                            <td>Antibiotics</td>
+                            <td>Oct 20, 2023</td>
+                            <td>80 bottles</td>
+                            <td>₹24,000</td>
+                            <td><span class="status-badge status-critical">Critical</span></td>
+                            <td>9</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('AMOX250')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-dispose" data-medicine="AMOX250"><i class="fas fa-trash-alt"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="VITC1000"></td>
+                            <td>Vitamin C 1000mg</td>
+                            <td>BATCH-78903</td>
+                            <td>Vitamins</td>
+                            <td>Oct 25, 2023</td>
+                            <td>200 bottles</td>
+                            <td>₹12,000</td>
+                            <td><span class="status-badge status-expired">Expired</span></td>
+                            <td>4</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('VITC1000')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-dispose" data-medicine="VITC1000"><i class="fas fa-trash-alt"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="IBU400"></td>
+                            <td>Ibuprofen 400mg</td>
+                            <td>BATCH-78904</td>
+                            <td>Painkillers</td>
+                            <td>Nov 5, 2023</td>
+                            <td>120 strips</td>
+                            <td>₹14,400</td>
+                            <td><span class="status-badge status-expiring">Expiring Soon</span></td>
+                            <td>-5</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('IBU400')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-restock"><i class="fas fa-sync"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="CETI10"></td>
+                            <td>Cetirizine 10mg</td>
+                            <td>BATCH-78905</td>
+                            <td>Allergy</td>
+                            <td>Nov 10, 2023</td>
+                            <td>90 strips</td>
+                            <td>₹8,100</td>
+                            <td><span class="status-badge status-expiring">Expiring Soon</span></td>
+                            <td>-10</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('CETI10')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-restock"><i class="fas fa-sync"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="medicine-checkbox" data-medicine="OME20"></td>
+                            <td>Omeprazole 20mg</td>
+                            <td>BATCH-78906</td>
+                            <td>Digestive</td>
+                            <td>Oct 18, 2023</td>
+                            <td>60 bottles</td>
+                            <td>₹21,600</td>
+                            <td><span class="status-badge status-expired">Expired</span></td>
+                            <td>11</td>
+                            <td>
+                                <button class="action-btn action-view" onclick="openMedicineDetails('OME20')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-dispose" data-medicine="OME20"><i class="fas fa-trash-alt"></i></button>
+                                <button class="action-btn action-return"><i class="fas fa-undo"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medicine Details Modal -->
+    <div class="modal" id="medicineDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Medicine Details - <span id="modalMedicineName"></span></div>
+                <button class="modal-close" onclick="closeMedicineDetails()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="medicine-image">
+                    <i class="fas fa-pills fa-3x"></i>
+                </div>
+                
+                <div class="medicine-details-grid">
+                    <div>
+                        <h3>Medicine Information</h3>
+                        <p><strong>Medicine Name:</strong> <span id="detailMedicineName">-</span></p>
+                        <p><strong>Generic Name:</strong> <span id="detailGenericName">-</span></p>
+                        <p><strong>Batch Number:</strong> <span id="detailBatchNo">-</span></p>
+                        <p><strong>Manufacturer:</strong> <span id="detailManufacturer">-</span></p>
+                        <p><strong>Category:</strong> <span id="detailCategory">-</span></p>
+                        <p><strong>Expiry Date:</strong> <span id="detailExpiryDate">-</span></p>
+                    </div>
+                    <div>
+                        <h3>Stock & Financials</h3>
+                        <p><strong>Current Stock:</strong> <span id="detailStock">-</span></p>
+                        <p><strong>Stock Value:</strong> <span id="detailStockValue">-</span></p>
+                        <p><strong>Purchase Price:</strong> <span id="detailPurchasePrice">-</span></p>
+                        <p><strong>Supplier:</strong> <span id="detailSupplier">-</span></p>
+                        <p><strong>Purchase Date:</strong> <span id="detailPurchaseDate">-</span></p>
+                        <p><strong>Days Expired:</strong> <span id="detailDaysExpired">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Disposal Timeline -->
+                <div class="timeline">
+                    <h3>Expiry & Disposal Timeline</h3>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <strong>Purchased</strong>
+                            <div class="timeline-date" id="timelinePurchaseDate">-</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <strong>Stocked</strong>
+                            <div class="timeline-date" id="timelineStockDate">-</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <strong>Expired</strong>
+                            <div class="timeline-date" id="timelineExpiryDate">-</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="background-color: var(--danger);">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <strong>Disposal Required</strong>
+                            <div class="timeline-date" id="timelineDisposalDate">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-actions" style="margin-top: 20px;">
+                    <button class="btn btn-danger"><i class="fas fa-trash-alt"></i> Dispose Now</button>
+                    <button class="btn btn-warning"><i class="fas fa-undo"></i> Return to Supplier</button>
+                    <button class="btn btn-outline"><i class="fas fa-print"></i> Print Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Medicine details data
+        const medicineDetails = {
+            'PARA500': {
+                medicineName: 'Paracetamol 500mg',
+                genericName: 'Acetaminophen',
+                batchNo: 'BATCH-78901',
+                manufacturer: 'PharmaCorp Ltd.',
+                category: 'Painkillers',
+                expiryDate: 'October 15, 2023',
+                stock: '150 strips',
+                stockValue: '₹18,000',
+                purchasePrice: '₹120 per strip',
+                supplier: 'MediSupplies Inc.',
+                purchaseDate: 'April 10, 2023',
+                daysExpired: '14',
+                timeline: {
+                    purchased: 'Apr 10, 2023',
+                    stocked: 'Apr 12, 2023',
+                    expired: 'Oct 15, 2023',
+                    disposal: 'Immediate'
+                }
+            },
+            'AMOX250': {
+                medicineName: 'Amoxicillin 250mg',
+                genericName: 'Amoxicillin Trihydrate',
+                batchNo: 'BATCH-78902',
+                manufacturer: 'Antibio Pharma',
+                category: 'Antibiotics',
+                expiryDate: 'October 20, 2023',
+                stock: '80 bottles',
+                stockValue: '₹24,000',
+                purchasePrice: '₹300 per bottle',
+                supplier: 'Global Med Supplies',
+                purchaseDate: 'March 15, 2023',
+                daysExpired: '9',
+                timeline: {
+                    purchased: 'Mar 15, 2023',
+                    stocked: 'Mar 18, 2023',
+                    expired: 'Oct 20, 2023',
+                    disposal: 'Immediate (Critical)'
+                }
+            }
+        };
+
+        // Open medicine details modal
+        function openMedicineDetails(medicineId) {
+            const modal = document.getElementById('medicineDetailsModal');
+            const medicine = medicineDetails[medicineId];
+            
+            if (medicine) {
+                document.getElementById('modalMedicineName').textContent = medicine.medicineName;
+                document.getElementById('detailMedicineName').textContent = medicine.medicineName;
+                document.getElementById('detailGenericName').textContent = medicine.genericName;
+                document.getElementById('detailBatchNo').textContent = medicine.batchNo;
+                document.getElementById('detailManufacturer').textContent = medicine.manufacturer;
+                document.getElementById('detailCategory').textContent = medicine.category;
+                document.getElementById('detailExpiryDate').textContent = medicine.expiryDate;
+                document.getElementById('detailStock').textContent = medicine.stock;
+                document.getElementById('detailStockValue').textContent = medicine.stockValue;
+                document.getElementById('detailPurchasePrice').textContent = medicine.purchasePrice;
+                document.getElementById('detailSupplier').textContent = medicine.supplier;
+                document.getElementById('detailPurchaseDate').textContent = medicine.purchaseDate;
+                document.getElementById('detailDaysExpired').textContent = medicine.daysExpired;
+                
+                // Update timeline
+                document.getElementById('timelinePurchaseDate').textContent = medicine.timeline.purchased;
+                document.getElementById('timelineStockDate').textContent = medicine.timeline.stocked;
+                document.getElementById('timelineExpiryDate').textContent = medicine.timeline.expired;
+                document.getElementById('timelineDisposalDate').textContent = medicine.timeline.disposal;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // Close medicine details modal
+        function closeMedicineDetails() {
+            document.getElementById('medicineDetailsModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('medicineDetailsModal');
+            if (event.target === modal) {
+                closeMedicineDetails();
+            }
+        }
+
+        // Bulk selection functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const medicineCheckboxes = document.querySelectorAll('.medicine-checkbox');
+            const bulkActions = document.getElementById('bulkActions');
+            const bulkSelection = document.getElementById('bulkSelection');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            
+            // Select All checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                medicineCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateBulkActions();
+            });
+            
+            // Select All button
+            selectAllBtn.addEventListener('click', function() {
+                const allSelected = Array.from(medicineCheckboxes).every(cb => cb.checked);
+                medicineCheckboxes.forEach(checkbox => {
+                    checkbox.checked = !allSelected;
+                });
+                selectAllCheckbox.checked = !allSelected;
+                updateBulkActions();
+            });
+            
+            // Individual checkbox changes
+            medicineCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateBulkActions);
+            });
+            
+            // Update bulk actions
+            function updateBulkActions() {
+                const selectedCount = document.querySelectorAll('.medicine-checkbox:checked').length;
+                
+                if (selectedCount > 0) {
+                    bulkActions.classList.add('active');
+                    bulkSelection.textContent = `${selectedCount} medicines selected`;
+                } else {
+                    bulkActions.classList.remove('active');
+                }
+                
+                // Update Select All checkbox state
+                selectAllCheckbox.checked = selectedCount === medicineCheckboxes.length;
+                selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < medicineCheckboxes.length;
+            }
+            
+            // Bulk dispose button
+            document.getElementById('bulkDispose').addEventListener('click', function() {
+                const selectedMedicines = Array.from(document.querySelectorAll('.medicine-checkbox:checked'))
+                    .map(cb => cb.getAttribute('data-medicine'));
+                
+                if (selectedMedicines.length > 0) {
+                    if (confirm(`Dispose ${selectedMedicines.length} expired medicines? This action cannot be undone.`)) {
+                        alert(`Initiating disposal process for ${selectedMedicines.length} medicines...`);
+                        selectedMedicines.forEach(medicineId => {
+                            disposeMedicine(medicineId);
+                        });
+                    }
+                }
+            });
+            
+            // Bulk return button
+            document.getElementById('bulkReturn').addEventListener('click', function() {
+                const selectedMedicines = Array.from(document.querySelectorAll('.medicine-checkbox:checked'))
+                    .map(cb => cb.getAttribute('data-medicine'));
+                
+                if (selectedMedicines.length > 0) {
+                    alert(`Initiating return process for ${selectedMedicines.length} medicines to suppliers...`);
+                    selectedMedicines.forEach(medicineId => {
+                        returnMedicine(medicineId);
+                    });
+                }
+            });
+            
+            // Bulk cancel button
+            document.getElementById('bulkCancel').addEventListener('click', function() {
+                medicineCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectAllCheckbox.checked = false;
+                updateBulkActions();
+            });
+            
+            // Dispose individual medicine buttons
+            const disposeButtons = document.querySelectorAll('.action-dispose');
+            disposeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = this.getAttribute('data-medicine');
+                    const medicineName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                    
+                    if (confirm(`Dispose ${medicineName}? This action cannot be undone.`)) {
+                        disposeMedicine(medicineId);
+                    }
+                });
+            });
+            
+            // Return to supplier buttons
+            const returnButtons = document.querySelectorAll('.action-return');
+            returnButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                    alert(`Initiating return process for ${medicineId} to supplier...`);
+                    // In real application, this would start return process
+                });
+            });
+            
+            // Restock buttons
+            const restockButtons = document.querySelectorAll('.action-restock');
+            restockButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                    alert(`Creating restock order for ${medicineId}...`);
+                    // In real application, this would create restock order
+                });
+            });
+            
+            // Dispose critical items button
+            document.querySelector('.btn-danger').addEventListener('click', function() {
+                const criticalMedicines = Array.from(document.querySelectorAll('.status-critical'))
+                    .map(row => row.closest('tr').querySelector('td:nth-child(2)').textContent);
+                
+                if (criticalMedicines.length > 0) {
+                    if (confirm(`Dispose ${criticalMedicines.length} critical expired medicines?`)) {
+                        alert(`Initiating critical disposal process...`);
+                        criticalMedicines.forEach(medicineName => {
+                            // In real application, this would dispose critical medicines
+                        });
+                    }
+                }
+            });
+            
+            // View expiring soon button
+            document.querySelector('.btn-warning').addEventListener('click', function() {
+                document.querySelector('select.filter-select').value = 'future';
+                alert('Filtering for expiring soon medicines...');
+                // In real application, this would apply the filter
+            });
+            
+            // Add disposal record button
+            document.querySelector('.btn-primary:last-child').addEventListener('click', function() {
+                alert('Opening disposal record form...');
+                // In real application, this would open a form
+            });
+            
+            // Export report button
+            document.querySelector('.btn-outline:last-child').addEventListener('click', function() {
+                alert('Exporting expired medicines report...');
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-download"></i> Export Report';
+                    alert('Report exported successfully!');
+                }, 2000);
+            });
+            
+            // Generate compliance report button
+            document.querySelector('.btn-primary:last-child').addEventListener('click', function() {
+                alert('Generating compliance report...');
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-file-pdf"></i> Generate Compliance Report';
+                    alert('Compliance report generated!');
+                }, 2000);
+            });
+        });
+        
+        // Dispose medicine function
+        function disposeMedicine(medicineId) {
+            const row = document.querySelector(`.medicine-checkbox[data-medicine="${medicineId}"]`).closest('tr');
+            const disposeBtn = row.querySelector('.action-dispose');
+            
+            disposeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            disposeBtn.disabled = true;
+            
+            setTimeout(() => {
+                row.style.opacity = '0.5';
+                row.style.backgroundColor = '#f8f9fa';
+                disposeBtn.innerHTML = '<i class="fas fa-check"></i>';
+                alert(`Medicine ${medicineId} disposed successfully`);
+                updateExpiredSummary();
+            }, 1500);
+        }
+        
+        // Return medicine function
+        function returnMedicine(medicineId) {
+            const row = document.querySelector(`.medicine-checkbox[data-medicine="${medicineId}"]`).closest('tr');
+            const returnBtn = row.querySelector('.action-return');
+            
+            returnBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            returnBtn.disabled = true;
+            
+            setTimeout(() => {
+                returnBtn.innerHTML = '<i class="fas fa-check"></i>';
+                alert(`Return initiated for ${medicineId}`);
+            }, 1500);
+        }
+        
+        // Update expired summary after actions
+        function updateExpiredSummary() {
+            const expiredCount = document.querySelectorAll('.status-expired, .status-critical').length;
+            const expiringCount = document.querySelectorAll('.status-expiring').length;
+            
+            document.querySelector('.summary-card:nth-child(1) .summary-card-value').textContent = expiredCount;
+            document.querySelector('.summary-card:nth-child(2) .summary-card-value').textContent = expiringCount;
+            
+            // Update critical alert if no more critical items
+            const criticalCount = document.querySelectorAll('.status-critical').length;
+            if (criticalCount === 0) {
+                document.querySelector('.critical-alert').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
